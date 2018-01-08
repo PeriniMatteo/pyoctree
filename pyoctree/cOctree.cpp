@@ -335,8 +335,9 @@ bool cOctNode::boxRayIntersect(cLine &ray)
 // ------------------------------------------------------
 
 
-cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, int max_points)
+cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, int max_points, int max_depth = 10)
 {
+    MAX_OCTREE_LEVELS = max_depth;
     MAX_POINTS = max_points;
     vertexCoords3D    = _vertexCoords3D;
     polyConnectivity  = _polyConnectivity;

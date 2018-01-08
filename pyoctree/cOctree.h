@@ -91,14 +91,14 @@ public:
 class cOctree {
 public:
 
-    static const int MAX_OCTREE_LEVELS = 10;
+    int MAX_OCTREE_LEVELS = 10;
     int MAX_POINTS;
     int branchOffsets[8][3];
     cOctNode root;
     vector<vector<double> > vertexCoords3D;
     vector<vector<int> > polyConnectivity;
     vector<cTri> polyList;
-    cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, int max_points);
+    cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, int max_points, int max_depth);
     ~cOctree();    
     double getSizeRoot();
     int numPolys();

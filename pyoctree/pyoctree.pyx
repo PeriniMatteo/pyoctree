@@ -53,7 +53,7 @@ cdef extern from "cOctree.h":
         bint boxRayIntersect(cLine &ray)
         
     cdef cppclass cOctree:
-        cOctree(vector[vector[double]] vertexCoords3D, vector[vector[int]] polyConnectivity, int max_points)
+        cOctree(vector[vector[double]] vertexCoords3D, vector[vector[int]] polyConnectivity, int max_points, int max_depth)
         int numPolys()
         cOctNode root
         vector[Intersection] findRayIntersect(cLine ray)
@@ -72,7 +72,7 @@ cdef class PyOctree:
     cdef public PyOctnode root
     cdef public list polyList
 
-    def __cinit__(self,double[:,::1] _vertexCoords3D, int[:,::1] _polyConnectivity, int mp):
+    def __cinit__(self,double[:,::1] _vertexCoords3D, int[:,::1] _polyConnectivity, int mp, int md):
     
         cdef int i, j
         cdef vector[double] coords
@@ -94,7 +94,7 @@ cdef class PyOctree:
             polyConnectivity.push_back(connect)
             
         # Create cOctree
-        self.thisptr = new cOctree(vertexCoords3D,polyConnectivity, mp)
+        self.thisptr = new cOctree(vertexCoords3D,polyConnectivity, mp, md)
             
         # Get root node
         cdef cOctNode *node = &self.thisptr.root
