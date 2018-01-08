@@ -46,7 +46,7 @@ public:
 class cOctNode {
 public:
 
-    static const int MAX_OCTNODE_OBJECTS  = 200;
+    int MAX_OCTNODE_OBJECTS  = 200;
     static const int NUM_BRANCHES_OCTNODE = 8;  
     double size;
     int level;
@@ -56,12 +56,12 @@ public:
     vector<int> data;
     vector<double> low, upp;
     cOctNode();
-    cOctNode(int _level, string _nid, vector<double> _position, double _size);
+    cOctNode(int _level, string _nid, vector<double> _position, double _size, int max_points);
     ~cOctNode();
     bool isLeafNode();
     int numPolys();
     void addPoly(int _indx);
-    void addNode(int _level, string _nid, vector<double> _position, double _size);
+    void addNode(int _level, string _nid, vector<double> _position, double _size, int max_points);
     void getLowUppVerts();
     bool boxRayIntersect(cLine &ray);
     bool sphereRayIntersect(cLine &ray);
@@ -92,12 +92,13 @@ class cOctree {
 public:
 
     static const int MAX_OCTREE_LEVELS = 10;
+    int MAX_POINTS;
     int branchOffsets[8][3];
     cOctNode root;
     vector<vector<double> > vertexCoords3D;
     vector<vector<int> > polyConnectivity;
     vector<cTri> polyList;
-    cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity);
+    cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, int max_points);
     ~cOctree();    
     double getSizeRoot();
     int numPolys();

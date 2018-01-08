@@ -220,9 +220,10 @@ cOctNode::cOctNode()
     data.reserve(MAX_OCTNODE_OBJECTS);
 }
 
-cOctNode::cOctNode(int _level, string _nid, vector<double> _position, double _size)
+cOctNode::cOctNode(int _level, string _nid, vector<double> _position, double _size, int max_points)
 {
     // octNode constructor with level, node id (nid), position and size
+    MAX_OCTNODE_OBJECTS = max_points;
     level    = _level;
     nid      = _nid;
     position = _position;
@@ -259,9 +260,9 @@ void cOctNode::addPoly(int _indx) { data.push_back(_indx); }
 
 int cOctNode::numPolys() { return (int)(data.size()); }
 
-void cOctNode::addNode(int _level, string _nid, vector<double> _position, double _size)
+void cOctNode::addNode(int _level, string _nid, vector<double> _position, double _size, int max_points)
 {
-    branches.push_back(cOctNode(_level,_nid,_position,_size));
+    branches.push_back(cOctNode(_level,_nid,_position,_size, max_points));
 }
 
 bool cOctNode::sphereRayIntersect(cLine &ray)
@@ -334,8 +335,9 @@ bool cOctNode::boxRayIntersect(cLine &ray)
 // ------------------------------------------------------
 
 
-cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity)
+cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, int max_points)
 {
+    MAX_POINTS = max_points;
     vertexCoords3D    = _vertexCoords3D;
     polyConnectivity  = _polyConnectivity;
     int _offsets[][3] = {{-1,-1,-1},{+1,-1,-1},{-1,+1,-1},{+1,+1,-1},
@@ -350,7 +352,7 @@ cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _
     setupPolyList();    
     vector<double> position = getPositionRoot();
     double size = getSizeRoot();
-    root = cOctNode(1,"0", position, size);
+    root = cOctNode(1,"0", position, size, MAX_POINTS);
     insertPolys();
 }
 
@@ -452,7 +454,7 @@ void cOctree::splitNodeAndReallocate(cOctNode &node)
         for (int j=0; j<3; j++) {
             position[j] = node.position[j] + 0.25*node.size*branchOffsets[i][j]; }
         string nid = node.nid + "-" + NumberToString(i);
-        node.addNode(node.level+1,nid,position,0.5*node.size); 
+        node.addNode(node.level+1,nid,position,0.5*node.size, this->MAX_POINTS); 
     }
     
     // Reallocate date from node to branches
