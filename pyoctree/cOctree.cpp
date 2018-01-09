@@ -337,8 +337,19 @@ bool cOctNode::boxRayIntersect(cLine &ray)
 
 // ------------------------------------------------------
 
-
 cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, int max_points, int max_depth = 10)
+{
+    tp->push([_vertexCoords3D, _polyConnectivity, max_points, max_depth](){
+        auto oct = cOctree(_vertexCoords3D, _polyConnectivity, max_points, max_depth, true);
+    });
+    tp->push([_vertexCoords3D, _polyConnectivity, max_points, max_depth](){
+        auto oct2 = cOctree(_vertexCoords3D, _polyConnectivity, max_points, max_depth, true);
+    });
+    tp->wait();
+    //auto oct = cOctree(_vertexCoords3D, _polyConnectivity, max_points, max_depth, true);
+}
+
+cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, int max_points, int max_depth, bool final)
 {
     MAX_OCTREE_LEVELS = max_depth;
     MAX_POINTS = max_points;
