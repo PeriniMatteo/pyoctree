@@ -376,6 +376,14 @@ cdef class PyOctnode:
                 return True
         return False
 
+    def get_voxel_size(self):
+        '''
+        get_voxel_size()
+        
+        Return the dimension of the voxel edges
+        '''
+        return self.thisptr.size
+
     cdef printWarningMsg(self,s):
         print('PyOctnode is managed by PyOctree: %s is read-only' % s)
         
