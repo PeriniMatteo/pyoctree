@@ -375,7 +375,7 @@ cdef class PyOctnode:
             if self.thisptr.data[i]==label:
                 return True
         return False
-        
+
     cdef printWarningMsg(self,s):
         print('PyOctnode is managed by PyOctree: %s is read-only' % s)
         

@@ -4,7 +4,10 @@
 // This file is part of pyoctree - See LICENSE.txt for information on usage and redistribution
 
 #include "cOctree.h"
+#include "threadpool.hpp"
 
+using namespace astp;
+auto tp = new ThreadPool();
 // ------------------------------------------------------
 
 cLine::cLine() 
@@ -392,17 +395,22 @@ void cOctree::insertPoly(cOctNode &node, cTri &poly)
     } else {
       
         for (unsigned int i=0; i<node.branches.size(); i++) {
+            //tp->push([this, &node, &poly, i] () {
+            //tp->synchronize(); 
             insertPoly(node.branches[i],poly);
+            //tp->end_synchronize();
+            //});
         }
-        
+        //tp->wait();
     }
 }
 
 void cOctree::insertPolys()
 {
     for (int i=0; i<numPolys(); i++) {
-        insertPoly(root,polyList[i]);
+            insertPoly(root,polyList[i]);
     }
+   
 }
 
 vector<double> cOctree::getPositionRoot() {
