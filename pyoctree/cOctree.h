@@ -111,11 +111,13 @@ public:
     vector<int> findRayIntersectsSorted(vector<cLine> &rayList);		
     vector<cOctNode*> getNodesFromLabel(int polyLabel);	
     vector<cOctNode*> getSortedNodesToCheck(cLine &ray);
+    vector<cOctNode*> get_Leafs();
     void insertPoly(cOctNode &node, cTri &poly);
     void insertPolys();
     void setupPolyList();
     void splitNodeAndReallocate(cOctNode &node);
     void findBranchesByLabel(int polyLabel, cOctNode &node, vector<cOctNode*> &nodeList);
+    void findIfLeaf(cOctNode &node, vector<cOctNode*> &nodeList);
     void getPolysToCheck(cOctNode &node, cLine &ray, set<int> &intTestPolys);
     void getNodesToCheck(cOctNode &node, cLine &ray, vector<pair<cOctNode*,double> > &nodeList);
 };

@@ -503,6 +503,28 @@ void cOctree::findBranchesByLabel(int polyLabel, cOctNode &node, vector<cOctNode
         }
     }
 }
+////////////////////////////////////////////////////////////////////////////////
+
+vector<cOctNode*> cOctree::get_Leafs()
+{
+    // Function for finding all the nodes that contains tri with given label 
+    vector<cOctNode*> nodeList;
+    findIfLeaf(root,nodeList);
+    return nodeList;
+}
+
+void cOctree::findIfLeaf(cOctNode &node, vector<cOctNode*> &nodeList)
+{
+    // Recursive function used by getNodesFromLabel
+    if (node.isLeafNode()) {
+        nodeList.push_back(&node);
+    } else {
+        for (unsigned int i=0; i<node.branches.size(); i++) {
+            findIfLeaf(node.branches[i], nodeList);
+        }
+    }
+}
+////////////////////////////////////////////////////////////////////////////////
 
 cOctNode* cOctree::getNodeFromId(string nodeId)
 {
