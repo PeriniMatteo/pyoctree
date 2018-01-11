@@ -524,6 +524,27 @@ void cOctree::findIfLeaf(cOctNode &node, vector<cOctNode*> &nodeList)
         }
     }
 }
+
+vector<cOctNode*> cOctree::get_Nodes()
+{
+    // Function for finding all the nodes that contains tri with given label 
+    vector<cOctNode*> nodeList;
+    findNodes(root,nodeList);
+    return nodeList;
+}
+
+void cOctree::findNodes(cOctNode &node, vector<cOctNode*> &nodeList)
+{
+    // Recursive function used by getNodesFromLabel
+    //if (node.isLeafNode()) {
+    //    nodeList.push_back(&node);
+    //} else {
+    nodeList.push_back(&node);
+    for (unsigned int i=0; i<node.branches.size(); i++) {
+        findNodes(node.branches[i], nodeList);
+    }
+    //}
+}
 ////////////////////////////////////////////////////////////////////////////////
 
 cOctNode* cOctree::getNodeFromId(string nodeId)

@@ -65,6 +65,7 @@ cdef extern from "cOctree.h":
         set[int] getListPolysToCheck(cLine &ray)
         vector[cOctNode*] getSortedNodesToCheck(cLine &ray)
         vector[cOctNode*] get_Leafs();
+        vector[cOctNode*] get_Nodes();
     
     
 cdef class PyOctree:
@@ -284,7 +285,7 @@ cdef class PyOctree:
                 self.countLeafs(branch,numleafs)
         else:
             (&numleafs)[0] = (&numleafs)[0] + 1
-    
+
     def getLeafs(self):
         '''
         getNodeFromId(str nodeId)
@@ -302,7 +303,27 @@ cdef class PyOctree:
         if len(nodeList)==1:
             return nodeList[0]
         else:
-            return nodeList        
+            return nodeList
+
+    def getNodes(self):
+        '''
+        getNodeFromId(str nodeId)
+        
+        Returns a PyOctnode given the node string id i.e. '0' for root and 
+        '0-0' for first branch
+        '''
+        cdef int i
+        cdef vector[cOctNode*] nodes = self.thisptr.get_Nodes()
+        cdef cOctNode *node = NULL
+        cdef list nodeList = []
+        for i in range(nodes.size()):
+            node = nodes[i]
+            nodeList.append(PyOctnode_Init(node,self))
+        if len(nodeList)==1:
+            return nodeList[0]
+        else:
+            return nodeList
+
 ################################################################################
 
     def getOctreeRep(self,fileName='octree.vtu'):
