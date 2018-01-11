@@ -218,6 +218,7 @@ cOctNode::cOctNode()
     level = 0;
     nid   = "";
     size  = 1.0;
+    inside = false;
     position.resize(3,0.0);
     getLowUppVerts();
     data.reserve(MAX_OCTNODE_OBJECTS);
@@ -231,6 +232,7 @@ cOctNode::cOctNode(int _level, string _nid, vector<double> _position, double _si
     nid      = _nid;
     position = _position;
     size     = _size;
+    inside   = false;
     getLowUppVerts();
     data.reserve(MAX_OCTNODE_OBJECTS);    
 }

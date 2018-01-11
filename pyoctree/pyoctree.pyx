@@ -42,6 +42,7 @@ cdef extern from "cOctree.h":
         
     cdef cppclass cOctNode:
         double size
+        bint inside
         int level
         string nid
         vector[double] position
@@ -392,8 +393,7 @@ cdef class PyOctree:
     property numPolys:
         def __get__(self):
             return self.thisptr.numPolys()
-        
-        
+
 cdef class Intersect:
     cdef public double s
     cdef public np.ndarray p
@@ -539,6 +539,13 @@ cdef class PyOctnode:
             return self.thisptr.numPolys()
         def __set__(self,_numPolys):
             pass
+
+    property isInside:
+        '''Number of polygons in given octNode'''
+        def __get__(self):
+            return self.thisptr.inside
+        def __set__(self,_inside):
+            self.thisptr.inside = _inside
 
     property size:
         '''Size of octNode bounding box'''

@@ -49,6 +49,7 @@ public:
     int MAX_OCTNODE_OBJECTS  = 200;
     static const int NUM_BRANCHES_OCTNODE = 8;  
     double size;
+    bool inside;
     int level;
     string nid;
     vector<double> position;
