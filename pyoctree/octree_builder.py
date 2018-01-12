@@ -36,7 +36,8 @@ from OCC.BRepPrimAPI import BRepPrimAPI_MakeBox
 # and reading mesh data 
 
 reader = vtk.vtkSTLReader()
-reader.SetFileName("./Examples/mesh_original.stl")
+#reader.SetFileName("./Examples/mesh_original.stl")
+reader.SetFileName("./Examples/knot.stl")
 reader.MergingOn()
 reader.Update()
 stl = reader.GetOutput()
@@ -66,7 +67,7 @@ for i in range(numPolys):
 
 # Create octree structure containing stl poly mesh
 max_level_depth = 4
-max_point_per_node = 2
+max_point_per_node = 10
 tree = ot.PyOctree(pointCoords,connectivity,max_point_per_node,max_level_depth)
 
 # Print out basic Octree data
@@ -78,13 +79,14 @@ print("Number of polys in Octree    = %d" % tree.numPolys)
 
 # checking every node along Z axis
 
-r = tree.root.size
+r = tree.root.size * 2
 for node in tree.getNodes():
     if node.numPolys == 0:
-        coords = node.position
-        ray = np.array([[coords[0],coords[1],coords[2]+r],[coords[0],coords[1],coords[2]-r]],dtype=np.float32)
-        if len(tree.rayIntersection(ray))%2:
-            node.isInside = True
+        if node.isLeaf:
+            coords = node.position
+            ray = np.array([[coords[0],coords[1],coords[2]+r],[coords[0],coords[1],coords[2]]],dtype=np.float32)
+            if len(tree.rayIntersection(ray))%2 == 1:
+                node.isInside = True
     else:
         node.isInside = True
 
