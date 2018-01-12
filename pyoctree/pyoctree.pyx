@@ -327,7 +327,7 @@ cdef class PyOctree:
 
 ################################################################################
 
-    def getOctreeRep(self,fileName='octree.vtu'):
+    def getOctreeRep(self,fileName='octree.vtu', obj=None):
         '''
         getOctreeRep(fileName='octree.vtu')
         
@@ -342,11 +342,23 @@ cdef class PyOctree:
         
         def getTree(node):
             if node.level==1:
-                getNodeRep(node)             
+                getNodeRep(node)
             for branch in node.branches:
                 getNodeRep(branch)
-                getTree(branch)        
-                
+                getTree(branch)
+
+        def getTreeOfLeafs(node):
+            if node.isLeaf and not (node.numPolys == 0):
+                getNodeRep(node)
+            for branch in node.branches:
+                getTreeOfLeafs(branch)
+
+        def getTreeOfInside(node):
+            if node.isInside:
+                getNodeRep(node)
+            for branch in node.branches:
+                getTreeOfInside(branch)
+
         def getNodeRep(node):
             offsets = {0:(-1,-1,-1),1:(+1,-1,-1),2:(+1,+1,-1),3:(-1,+1,-1),
                        4:(-1,-1,+1),5:(+1,-1,+1),6:(+1,+1,+1),7:(-1,+1,+1)} 
@@ -356,11 +368,16 @@ cdef class PyOctree:
                 connect.append(len(vertexCoords))
                 vertexCoords.append(vi)                       
             vertexConnect.append(connect)               
-               
+
         # For every node in tree, get vertex coordinates and connectivity
         vertexCoords  = []     
         vertexConnect = []
-        getTree(self.root)
+        if obj==None:
+            getTree(self.root)
+        elif obj=='OnlyLeafs':
+            getTreeOfLeafs(self.root)
+        elif obj=='OnlyInside':
+            getTreeOfInside(self.root)
         
         # Convert to vtk unstructured grid
         uGrid = vtk.vtkUnstructuredGrid()
