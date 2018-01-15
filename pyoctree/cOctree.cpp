@@ -4,10 +4,10 @@
 // This file is part of pyoctree - See LICENSE.txt for information on usage and redistribution
 
 #include "cOctree.h"
-#include "threadpool.hpp"
+//#include "threadpool.hpp"
 
-using namespace astp;
-auto tp = new ThreadPool();
+//using namespace astp;
+//auto tp = new ThreadPool();
 // ------------------------------------------------------
 
 cLine::cLine() 
@@ -384,14 +384,15 @@ void cOctree::insertPoly(cOctNode &node, cTri &poly)
     
         if (poly.isInNode(node)) {
         
-            if (node.numPolys() < node.MAX_OCTNODE_OBJECTS) {
-                node.addPoly(poly.label);
-            } else {
-                node.addPoly(poly.label);
-                if (node.level < MAX_OCTREE_LEVELS) {
-                    splitNodeAndReallocate(node);
-                }
+            //if (node.numPolys() < node.MAX_OCTNODE_OBJECTS) {
+            //if (node.numPolys() < 100) {
+            //    node.addPoly(poly.label);
+            //} else {
+            node.addPoly(poly.label);
+            if (node.level < MAX_OCTREE_LEVELS) {
+                splitNodeAndReallocate(node);
             }
+            //}
         }
         
     } else {
@@ -473,10 +474,11 @@ void cOctree::splitNodeAndReallocate(cOctNode &node)
         for (int j=0; j<node.numPolys(); j++) {
             int indx = node.data[j];
             if (polyList[indx].isInNode(node.branches[i])) {
-                if (node.branches[i].numPolys() < node.MAX_OCTNODE_OBJECTS) {
-                    node.branches[i].addPoly(indx);
-                } else {
+                //if (node.branches[i].numPolys() < node.MAX_OCTNODE_OBJECTS) {
+                if (node.branches[i].level < MAX_OCTREE_LEVELS) {
                     splitNodeAndReallocate(node.branches[i]);
+                } else {
+                    node.branches[i].addPoly(indx);
                 }
             }
         }

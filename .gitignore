@@ -62,3 +62,4 @@ dev/
 dist/
 pyoctree.egg-info/
 MANIFEST
+*.out
