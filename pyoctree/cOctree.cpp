@@ -4,6 +4,7 @@
 // This file is part of pyoctree - See LICENSE.txt for information on usage and redistribution
 
 #include "cOctree.h"
+#include "tribox_lib_v2.c"
 //#include "threadpool.hpp"
 
 //using namespace astp;
@@ -138,7 +139,7 @@ void cTri::getUpperVert()
     } 
 } 
 
-bool cTri::isInNode(cOctNode &node)
+bool cTri::isInNode(cOctNode &node, bool useold)
 {
     // Tests if bounding box of cTri is inside of or overlapping the given cOctNode
     // This is a simple test and even if bounding box is found to be inside the
@@ -150,6 +151,27 @@ bool cTri::isInNode(cOctNode &node)
     if (uppVert[1] < node.low[1]) return false;
     if (uppVert[2] < node.low[2]) return false;
     return true;
+}
+
+bool cTri::isInNode(cOctNode &node)
+{
+    // Tests if bounding box of cTri is inside of or overlapping the given cOctNode
+    // This is a simple test and even if bounding box is found to be inside the
+    // cOctNode, the cTri itself may not be
+    int i,j;
+    float boxcenter[3];
+    for (i=0; i<3; i++){
+        boxcenter[i] = node.position[i];
+    }
+    float boxhalfsize[3] = {float(node.size/2.0), float(node.size/2.0), float(node.size/2.0)};
+    float triverts[3][3];
+    for (i=0; i<3; i++){
+        for (j=0; j<3; j++){
+            triverts[i][j] = this->vertices[i][j];
+        }
+    }
+    bool overlap = triBoxOverlap(boxcenter, boxhalfsize, triverts);
+    return overlap;
 }
 
 bool cTri::isPointInTri(vector<double> &p)
