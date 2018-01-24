@@ -166,10 +166,10 @@ int main ( int argc, char *argv[] ){
 
     // Call iterative function 
    
-    
-    if (true){
+    // change this to (true) to compute and set the variable node.inside
+    // If you do not compute that, the value of inside is false for all nodes!
+    if (false){
       double r = oct.root.size * 2;
-      //std::array<double,3> vii;
       std::vector<double> p0(3);
       std::vector<double> p1(3);
       vector<Intersection> intersectList;
@@ -181,22 +181,24 @@ int main ( int argc, char *argv[] ){
               p1[j]= node->position[j];
             }
             p1[2] += r;
-            
-            //ray = np.array([[coords[0],coords[1],coords[2]+r],[coords[0],coords[1],coords[2]]],dtype=np.float32)
             cLine ray = cLine(p0,p1,0);
             intersectList = oct.findRayIntersect(ray);
             int numInts = intersectList.size();
-            if (numInts == 1){
+            if (numInts % 2 == 1){
               node->inside = true;
             }
           }else{
-            node->inside = false;
+            node->inside = true;
           }
         }
       }
     }
+    
+    // Uncomment the row to export the right octree
     ////////////////////////////////////////////////////////////////////////////
-    getInside(oct.root, vertexCoords, vertexConnect, offsets);
+    //getTree(oct.root, vertexCoords, vertexConnect, offsets);
+    getLeafs(oct.root, vertexCoords, vertexConnect, offsets);
+    //getInside(oct.root, vertexCoords, vertexConnect, offsets);
     ////////////////////////////////////////////////////////////////////////////
     std::cout << "Number of coords = " << vertexCoords.size() << std::endl;
     std::cout << "Number of connects = " << vertexConnect.size() << std::endl;
