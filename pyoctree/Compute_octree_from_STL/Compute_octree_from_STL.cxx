@@ -58,6 +58,39 @@ void getTree(cOctNode &node,
   }
 }
 
+void getLeafs(cOctNode &node, 
+            std::vector<std::array<double,3>>    &vertexCoords, 
+            vector<std::array<int,8>>            &vertexConnect,
+            std::vector<std::array<double,3>>    &offsets){
+  
+  if (!node.isLeafNode()){
+    for(cOctNode &i : node.branches) {
+      if (i.isLeafNode() && !(i.numPolys()==0)){
+        getNodeRep(i, vertexCoords, vertexConnect, offsets);
+      }else{
+        getLeafs(i, vertexCoords, vertexConnect, offsets);
+      }
+    }
+  }
+}
+
+void getInside(cOctNode &node, 
+            std::vector<std::array<double,3>>    &vertexCoords, 
+            vector<std::array<int,8>>            &vertexConnect,
+            std::vector<std::array<double,3>>    &offsets){
+  
+  if (!node.isLeafNode()){
+    for(cOctNode &i : node.branches) {
+      if (i.isLeafNode() && (i.inside)){
+        getNodeRep(i, vertexCoords, vertexConnect, offsets);
+      }else{
+        getInside(i, vertexCoords, vertexConnect, offsets);
+      }
+    }
+  }
+}
+
+
 int main ( int argc, char *argv[] ){
 
   bool fsave = false;
@@ -132,7 +165,39 @@ int main ( int argc, char *argv[] ){
                                             {-1,+1,+1}};
 
     // Call iterative function 
-    getTree(oct.root, vertexCoords, vertexConnect, offsets);
+   
+    
+    if (true){
+      double r = oct.root.size * 2;
+      //std::array<double,3> vii;
+      std::vector<double> p0(3);
+      std::vector<double> p1(3);
+      vector<Intersection> intersectList;
+      for (cOctNode* &node : oct.get_Nodes()){
+        if (node->isLeafNode()){
+          if (node->numPolys()==0){
+            for (int j=0;j<3; j++){
+              p0[j]= node->position[j];
+              p1[j]= node->position[j];
+            }
+            p1[2] += r;
+            
+            //ray = np.array([[coords[0],coords[1],coords[2]+r],[coords[0],coords[1],coords[2]]],dtype=np.float32)
+            cLine ray = cLine(p0,p1,0);
+            intersectList = oct.findRayIntersect(ray);
+            int numInts = intersectList.size();
+            if (numInts == 1){
+              node->inside = true;
+            }
+          }else{
+            node->inside = false;
+          }
+        }
+      }
+    }
+    ////////////////////////////////////////////////////////////////////////////
+    getInside(oct.root, vertexCoords, vertexConnect, offsets);
+    ////////////////////////////////////////////////////////////////////////////
     std::cout << "Number of coords = " << vertexCoords.size() << std::endl;
     std::cout << "Number of connects = " << vertexConnect.size() << std::endl;
 
