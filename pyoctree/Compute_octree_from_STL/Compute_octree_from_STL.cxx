@@ -168,21 +168,22 @@ int main ( int argc, char *argv[] ){
    
     // change this to (true) to compute and set the variable node.inside
     // If you do not compute that, the value of inside is false for all nodes!
-    if (false){
+    if (true){
       double r = oct.root.size * 2;
       std::vector<double> p0(3);
       std::vector<double> p1(3);
-      vector<Intersection> intersectList;
+      vector<int> intersectList;
       for (cOctNode* &node : oct.get_Nodes()){
-        if (node->isLeafNode()){
+        //if (node->isLeafNode()){
           if (node->numPolys()==0){
+            //std::cout << node->numPolys() << std::endl;
             for (int j=0;j<3; j++){
               p0[j]= node->position[j];
               p1[j]= node->position[j];
             }
-            p1[2] += r;
+            p1[2] = p1[2] + r;
             cLine ray = cLine(p0,p1,0);
-            intersectList = oct.findRayIntersect(ray);
+            intersectList = oct.findRayIntersect2(ray);
             int numInts = intersectList.size();
             if (numInts % 2 == 1){
               node->inside = true;
@@ -190,7 +191,7 @@ int main ( int argc, char *argv[] ){
           }else{
             node->inside = true;
           }
-        }
+        //}
       }
     }
     

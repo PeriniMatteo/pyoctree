@@ -81,6 +81,7 @@ public:
     ~cTri();
     bool isInNode(cOctNode &node);
     bool isInNode(cOctNode &node, bool useold);
+    bool isInRayZone(cLine &ray);
     bool isPointInTri(vector<double> &p);
     bool rayPlaneIntersectPoint(cLine &ray, bool entryOnly);
     bool rayPlaneIntersectPoint(cLine &ray, vector<double> &p, double &s);
@@ -107,8 +108,10 @@ public:
     cOctNode* getNodeFromId(string nodeId);
     cOctNode* findBranchById(string nodeId, cOctNode &node);
     set<int> getListPolysToCheck(cLine &ray);    
+    set<int> getListPolysToCheck2(cLine &ray);    
     vector<double> getPositionRoot();	
     vector<Intersection> findRayIntersect(cLine &ray);    
+    vector<int> findRayIntersect2(cLine &ray);    
     vector<int> findRayIntersects(vector<cLine> &rayList);
     vector<int> findRayIntersectsSorted(vector<cLine> &rayList);		
     vector<cOctNode*> getNodesFromLabel(int polyLabel);	
@@ -123,6 +126,7 @@ public:
     void findIfLeaf(cOctNode &node, vector<cOctNode*> &nodeList);
     void findNodes(cOctNode &node, vector<cOctNode*> &nodeList);
     void getPolysToCheck(cOctNode &node, cLine &ray, set<int> &intTestPolys);
+    void getPolysToCheck2(cLine &ray, set<int> &intTestPolys);
     void getNodesToCheck(cOctNode &node, cLine &ray, vector<pair<cOctNode*,double> > &nodeList);
 };
 

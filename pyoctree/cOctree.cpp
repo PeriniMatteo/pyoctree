@@ -153,6 +153,22 @@ bool cTri::isInNode(cOctNode &node, bool useold)
     return true;
 }
 
+bool cTri::isInRayZone(cLine &ray)
+{
+    // Tests if bounding box of cTri is inside of or overlapping the given cOctNode
+    // This is a simple test and even if bounding box is found to be inside the
+    // cOctNode, the cTri itself may not be
+    //std::cout << this->label << std::endl; 
+    if (((lowVert[0] < ray.p0[0]) && (uppVert[0] > ray.p0[0])) &&
+        ((lowVert[1] < ray.p0[1]) && (uppVert[1] > ray.p0[1]))) {
+        //std::cout << "xxx" << std::endl; 
+        return true;
+    }
+    // if ((lowVert[1] < ray.p0[1]) && (uppVert[1] > ray.p0[1])) return true;
+
+    return false;
+}
+
 bool cTri::isInNode(cOctNode &node)
 {
     // Tests if bounding box of cTri is inside of or overlapping the given cOctNode
@@ -604,6 +620,14 @@ set<int> cOctree::getListPolysToCheck(cLine &ray)
     return intTestPolys;
 }
 
+set<int> cOctree::getListPolysToCheck2(cLine &ray)
+{
+    // Returns a list of all polygons that are within OctNodes hit by a given ray
+    set<int> intTestPolys;
+    getPolysToCheck2(ray,intTestPolys);
+    return intTestPolys;
+}
+
 void cOctree::getPolysToCheck(cOctNode &node, cLine &ray, set<int> &intTestPolys)
 {
     // Utility function for getListPolysToCheck. Finds all OctNodes hit by a given ray
@@ -620,6 +644,15 @@ void cOctree::getPolysToCheck(cOctNode &node, cLine &ray, set<int> &intTestPolys
             }
         }
     }
+}
+void cOctree::getPolysToCheck2(cLine &ray, set<int> &intTestPolys)
+{
+    for (cTri &p : this->polyList){
+        if (p.isInRayZone(ray)){
+            intTestPolys.insert(p.label);
+        }
+    }
+    
 }
 
 vector<cOctNode*> cOctree::getSortedNodesToCheck(cLine &ray)
@@ -679,6 +712,23 @@ vector<Intersection> cOctree::findRayIntersect(cLine &ray)
     // Sort list in terms of distance of the intersection from the ray origin
     sort(intersectList.begin(),intersectList.end());
     
+    return intersectList;
+}
+
+vector<int> cOctree::findRayIntersect2(cLine &ray)
+{   
+    // Get polys to check
+    set<int> polyListCheck = getListPolysToCheck2(ray);
+    
+    // Loop through all polys in check list to find a possible intersection
+    vector<int> intersectList;
+    set<int>::iterator it;
+    double s;
+    for (it=polyListCheck.begin(); it!=polyListCheck.end(); ++it) {
+        int polyLabel = *it;
+        if (polyList[polyLabel].rayPlaneIntersectPoint(ray,true)) {
+            intersectList.push_back(polyLabel); } 
+    }
     return intersectList;
 }
 
