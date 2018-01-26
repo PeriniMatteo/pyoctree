@@ -42,6 +42,7 @@ cdef extern from "cOctree.h":
         
     cdef cppclass cOctNode:
         double size
+        bint inside
         int level
         string nid
         vector[double] position
@@ -64,6 +65,8 @@ cdef extern from "cOctree.h":
         vector[bint] findRayIntersectsSorted(vector[cLine] &rayList)
         set[int] getListPolysToCheck(cLine &ray)
         vector[cOctNode*] getSortedNodesToCheck(cLine &ray)
+        vector[cOctNode*] get_Leafs();
+        vector[cOctNode*] get_Nodes();
     
     
 cdef class PyOctree:
@@ -251,7 +254,7 @@ cdef class PyOctree:
         Returns the number of Octnodes in the Octree
         '''
         cdef int numNodes = 0
-        self.countNodes(self.root,numNodes)
+        self.countNodes(self.root, numNodes)
         return numNodes
         
     cdef void countNodes(self,PyOctnode node, int &numNodes):
@@ -263,8 +266,68 @@ cdef class PyOctree:
         if not node.isLeaf:
             for branch in node.branches:
                 self.countNodes(branch,numNodes)
-                
-    def getOctreeRep(self,fileName='octree.vtu'):
+
+################################################################################
+    cpdef int getNumberOfLeafs(self):
+        cdef int numleafs = 0
+        #cdef int i
+        #cdef list nodeList = []
+        self.countLeafs(self.root, numleafs)
+        return numleafs
+
+    cdef void countLeafs(self,PyOctnode node, int &numleafs):
+        '''
+        Utility function for getNumberOfNodes. Recursively counts number of Octnodes in Octree
+        '''
+        cdef PyOctnode branch
+        #(&numNodes)[0] = (&numNodes)[0] + 1  # Syntax here is fix for Cython bug
+        if not node.isLeaf:
+            for branch in node.branches:
+                self.countLeafs(branch,numleafs)
+        else:
+            (&numleafs)[0] = (&numleafs)[0] + 1
+
+    def getLeafs(self):
+        '''
+        getNodeFromId(str nodeId)
+        
+        Returns a PyOctnode given the node string id i.e. '0' for root and 
+        '0-0' for first branch
+        '''
+        cdef int i
+        cdef vector[cOctNode*] nodes = self.thisptr.get_Leafs()
+        cdef cOctNode *node = NULL
+        cdef list nodeList = []
+        for i in range(nodes.size()):
+            node = nodes[i]
+            nodeList.append(PyOctnode_Init(node,self))
+        if len(nodeList)==1:
+            return nodeList[0]
+        else:
+            return nodeList
+
+    def getNodes(self):
+        '''
+        getNodeFromId(str nodeId)
+        
+        Returns a PyOctnode given the node string id i.e. '0' for root and 
+        '0-0' for first branch
+        '''
+        cdef int i
+        cdef vector[cOctNode*] nodes = self.thisptr.get_Nodes()
+        cdef cOctNode *node = NULL
+        cdef list nodeList = []
+        for i in range(nodes.size()):
+            node = nodes[i]
+            nodeList.append(PyOctnode_Init(node,self))
+        if len(nodeList)==1:
+            return nodeList[0]
+        else:
+            return nodeList
+
+################################################################################
+
+    def getOctreeRep(self,fileName='octree.vtu', obj=None):
         '''
         getOctreeRep(fileName='octree.vtu')
         
@@ -279,11 +342,23 @@ cdef class PyOctree:
         
         def getTree(node):
             if node.level==1:
-                getNodeRep(node)             
+                getNodeRep(node)
             for branch in node.branches:
                 getNodeRep(branch)
-                getTree(branch)        
-                
+                getTree(branch)
+
+        def getTreeOfLeafs(node):
+            if node.isLeaf and not (node.numPolys == 0):
+                getNodeRep(node)
+            for branch in node.branches:
+                getTreeOfLeafs(branch)
+
+        def getTreeOfInside(node):
+            if node.isInside:
+                getNodeRep(node)
+            for branch in node.branches:
+                getTreeOfInside(branch)
+
         def getNodeRep(node):
             offsets = {0:(-1,-1,-1),1:(+1,-1,-1),2:(+1,+1,-1),3:(-1,+1,-1),
                        4:(-1,-1,+1),5:(+1,-1,+1),6:(+1,+1,+1),7:(-1,+1,+1)} 
@@ -293,11 +368,16 @@ cdef class PyOctree:
                 connect.append(len(vertexCoords))
                 vertexCoords.append(vi)                       
             vertexConnect.append(connect)               
-               
+
         # For every node in tree, get vertex coordinates and connectivity
         vertexCoords  = []     
         vertexConnect = []
-        getTree(self.root)
+        if obj==None:
+            getTree(self.root)
+        elif obj=='OnlyLeafs':
+            getTreeOfLeafs(self.root)
+        elif obj=='OnlyInside':
+            getTreeOfInside(self.root)
         
         # Convert to vtk unstructured grid
         uGrid = vtk.vtkUnstructuredGrid()
@@ -330,8 +410,7 @@ cdef class PyOctree:
     property numPolys:
         def __get__(self):
             return self.thisptr.numPolys()
-        
-        
+
 cdef class Intersect:
     cdef public double s
     cdef public np.ndarray p
@@ -375,6 +454,16 @@ cdef class PyOctnode:
             if self.thisptr.data[i]==label:
                 return True
         return False
+
+    def get_voxel_size(self):
+        '''
+        get_voxel_size()
+        
+        Return the dimension of the voxel edges
+        '''
+        return self.thisptr.size
+
+    
 
     cdef printWarningMsg(self,s):
         print('PyOctnode is managed by PyOctree: %s is read-only' % s)
@@ -467,6 +556,13 @@ cdef class PyOctnode:
             return self.thisptr.numPolys()
         def __set__(self,_numPolys):
             pass
+
+    property isInside:
+        '''Number of polygons in given octNode'''
+        def __get__(self):
+            return self.thisptr.inside
+        def __set__(self,_inside):
+            self.thisptr.inside = _inside
 
     property size:
         '''Size of octNode bounding box'''

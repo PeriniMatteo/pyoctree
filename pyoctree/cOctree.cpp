@@ -4,10 +4,12 @@
 // This file is part of pyoctree - See LICENSE.txt for information on usage and redistribution
 
 #include "cOctree.h"
-#include "threadpool.hpp"
+#include "tribox_lib_v2.c"
+//#include "tribox_lib.c"
+//#include "threadpool.hpp"
 
-using namespace astp;
-auto tp = new ThreadPool();
+//using namespace astp;
+//auto tp = new ThreadPool();
 // ------------------------------------------------------
 
 cLine::cLine() 
@@ -152,6 +154,43 @@ bool cTri::isInNode(cOctNode &node)
     return true;
 }
 
+bool cTri::isInRayZone(cLine &ray)
+{
+    // Tests if bounding box of cTri is inside of or overlapping the given cOctNode
+    // This is a simple test and even if bounding box is found to be inside the
+    // cOctNode, the cTri itself may not be
+    //std::cout << this->label << std::endl; 
+    if (((lowVert[0] < ray.p0[0]) && (uppVert[0] > ray.p0[0])) &&
+        ((lowVert[1] < ray.p0[1]) && (uppVert[1] > ray.p0[1]))) {
+        //std::cout << "xxx" << std::endl; 
+        return true;
+    }
+    // if ((lowVert[1] < ray.p0[1]) && (uppVert[1] > ray.p0[1])) return true;
+
+    return false;
+}
+
+bool cTri::isInNode2(cOctNode &node)
+{
+    // Tests if bounding box of cTri is inside of or overlapping the given cOctNode
+    // This is a simple test and even if bounding box is found to be inside the
+    // cOctNode, the cTri itself may not be
+    int i,j;
+    float boxcenter[3];
+    for (i=0; i<3; i++){
+        boxcenter[i] = node.position[i];
+    }
+    float boxhalfsize[3] = {float(node.size/2.0), float(node.size/2.0), float(node.size/2.0)};
+    float triverts[3][3];
+    for (i=0; i<3; i++){
+        for (j=0; j<3; j++){
+            triverts[i][j] = this->vertices[i][j];
+        }
+    }
+    bool overlap = triBoxOverlap(boxcenter, boxhalfsize, triverts);
+    return overlap;
+}
+
 bool cTri::isPointInTri(vector<double> &p)
 {
     // Determines if point p is within the cTri by computing and
@@ -218,21 +257,22 @@ cOctNode::cOctNode()
     level = 0;
     nid   = "";
     size  = 1.0;
+    inside = false;
     position.resize(3,0.0);
     getLowUppVerts();
-    data.reserve(MAX_OCTNODE_OBJECTS);
+    data.reserve(100);
 }
 
-cOctNode::cOctNode(int _level, string _nid, vector<double> _position, double _size, int max_points)
+cOctNode::cOctNode(int _level, string _nid, vector<double> _position, double _size)
 {
     // octNode constructor with level, node id (nid), position and size
-    MAX_OCTNODE_OBJECTS = max_points;
     level    = _level;
     nid      = _nid;
     position = _position;
     size     = _size;
+    inside   = false;
     getLowUppVerts();
-    data.reserve(MAX_OCTNODE_OBJECTS);    
+    data.reserve(100);    
 }
 
 // octNode destructor
@@ -263,9 +303,9 @@ void cOctNode::addPoly(int _indx) { data.push_back(_indx); }
 
 int cOctNode::numPolys() { return (int)(data.size()); }
 
-void cOctNode::addNode(int _level, string _nid, vector<double> _position, double _size, int max_points)
+void cOctNode::addNode(int _level, string _nid, vector<double> _position, double _size)
 {
-    branches.push_back(cOctNode(_level,_nid,_position,_size, max_points));
+    branches.push_back(cOctNode(_level,_nid,_position,_size));
 }
 
 bool cOctNode::sphereRayIntersect(cLine &ray)
@@ -337,7 +377,7 @@ bool cOctNode::boxRayIntersect(cLine &ray)
 
 // ------------------------------------------------------
 
-cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, int max_points, int max_depth = 10)
+cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, int max_depth = 10)
 {
     tp->push([_vertexCoords3D, _polyConnectivity, max_points, max_depth](){
         auto oct = cOctree(_vertexCoords3D, _polyConnectivity, max_points, max_depth, true);
@@ -352,7 +392,6 @@ cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _
 cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, int max_points, int max_depth, bool final)
 {
     MAX_OCTREE_LEVELS = max_depth;
-    MAX_POINTS = max_points;
     vertexCoords3D    = _vertexCoords3D;
     polyConnectivity  = _polyConnectivity;
     int _offsets[][3] = {{-1,-1,-1},{+1,-1,-1},{-1,+1,-1},{+1,+1,-1},
@@ -367,7 +406,7 @@ cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _
     setupPolyList();    
     vector<double> position = getPositionRoot();
     double size = getSizeRoot();
-    root = cOctNode(1,"0", position, size, MAX_POINTS);
+    root = cOctNode(1,"0", position, size);
     insertPolys();
 }
 
@@ -391,16 +430,17 @@ void cOctree::insertPoly(cOctNode &node, cTri &poly)
 {
     if (node.isLeafNode()) {
     
-        if (poly.isInNode(node)) {
+        if (poly.isInNode2(node)) {
         
-            if (node.numPolys() < node.MAX_OCTNODE_OBJECTS) {
-                node.addPoly(poly.label);
-            } else {
-                node.addPoly(poly.label);
-                if (node.level < MAX_OCTREE_LEVELS) {
-                    splitNodeAndReallocate(node);
-                }
+            //if (node.numPolys() < node.MAX_OCTNODE_OBJECTS) {
+            //if (node.numPolys() < 100) {
+            //    node.addPoly(poly.label);
+            //} else {
+            node.addPoly(poly.label);
+            if (node.level < MAX_OCTREE_LEVELS) {
+                splitNodeAndReallocate(node);
             }
+            //}
         }
         
     } else {
@@ -474,18 +514,19 @@ void cOctree::splitNodeAndReallocate(cOctNode &node)
         for (int j=0; j<3; j++) {
             position[j] = node.position[j] + 0.25*node.size*branchOffsets[i][j]; }
         string nid = node.nid + "-" + NumberToString(i);
-        node.addNode(node.level+1,nid,position,0.5*node.size, this->MAX_POINTS); 
+        node.addNode(node.level+1,nid,position,0.5*node.size); 
     }
     
     // Reallocate date from node to branches
     for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
         for (int j=0; j<node.numPolys(); j++) {
             int indx = node.data[j];
-            if (polyList[indx].isInNode(node.branches[i])) {
-                if (node.branches[i].numPolys() < node.MAX_OCTNODE_OBJECTS) {
-                    node.branches[i].addPoly(indx);
-                } else {
+            if (polyList[indx].isInNode2(node.branches[i])) {
+                //if (node.branches[i].numPolys() < node.MAX_OCTNODE_OBJECTS) {
+                if (node.branches[i].level < MAX_OCTREE_LEVELS) {
                     splitNodeAndReallocate(node.branches[i]);
+                } else {
+                    node.branches[i].addPoly(indx);
                 }
             }
         }
@@ -514,6 +555,49 @@ void cOctree::findBranchesByLabel(int polyLabel, cOctNode &node, vector<cOctNode
         }
     }
 }
+////////////////////////////////////////////////////////////////////////////////
+
+vector<cOctNode*> cOctree::get_Leafs()
+{
+    // Function for finding all the nodes that contains tri with given label 
+    vector<cOctNode*> nodeList;
+    findIfLeaf(root,nodeList);
+    return nodeList;
+}
+
+void cOctree::findIfLeaf(cOctNode &node, vector<cOctNode*> &nodeList)
+{
+    // Recursive function used by getNodesFromLabel
+    if (node.isLeafNode()) {
+        nodeList.push_back(&node);
+    } else {
+        for (unsigned int i=0; i<node.branches.size(); i++) {
+            findIfLeaf(node.branches[i], nodeList);
+        }
+    }
+}
+
+vector<cOctNode*> cOctree::get_Nodes()
+{
+    // Function for finding all the nodes that contains tri with given label 
+    vector<cOctNode*> nodeList;
+    findNodes(root,nodeList);
+    return nodeList;
+}
+
+void cOctree::findNodes(cOctNode &node, vector<cOctNode*> &nodeList)
+{
+    // Recursive function used by getNodesFromLabel
+    //if (node.isLeafNode()) {
+    //    nodeList.push_back(&node);
+    //} else {
+    nodeList.push_back(&node);
+    for (unsigned int i=0; i<node.branches.size(); i++) {
+        findNodes(node.branches[i], nodeList);
+    }
+    //}
+}
+////////////////////////////////////////////////////////////////////////////////
 
 cOctNode* cOctree::getNodeFromId(string nodeId)
 {
@@ -546,6 +630,14 @@ set<int> cOctree::getListPolysToCheck(cLine &ray)
     return intTestPolys;
 }
 
+set<int> cOctree::getListPolysToCheck2(cLine &ray)
+{
+    // Returns a list of all polygons that are within OctNodes hit by a given ray
+    set<int> intTestPolys;
+    getPolysToCheck2(ray,intTestPolys);
+    return intTestPolys;
+}
+
 void cOctree::getPolysToCheck(cOctNode &node, cLine &ray, set<int> &intTestPolys)
 {
     // Utility function for getListPolysToCheck. Finds all OctNodes hit by a given ray
@@ -562,6 +654,15 @@ void cOctree::getPolysToCheck(cOctNode &node, cLine &ray, set<int> &intTestPolys
             }
         }
     }
+}
+void cOctree::getPolysToCheck2(cLine &ray, set<int> &intTestPolys)
+{
+    for (cTri &p : this->polyList){
+        if (p.isInRayZone(ray)){
+            intTestPolys.insert(p.label);
+        }
+    }
+    
 }
 
 vector<cOctNode*> cOctree::getSortedNodesToCheck(cLine &ray)
@@ -621,6 +722,23 @@ vector<Intersection> cOctree::findRayIntersect(cLine &ray)
     // Sort list in terms of distance of the intersection from the ray origin
     sort(intersectList.begin(),intersectList.end());
     
+    return intersectList;
+}
+
+vector<int> cOctree::findRayIntersect2(cLine &ray)
+{   
+    // Get polys to check
+    set<int> polyListCheck = getListPolysToCheck2(ray);
+    
+    // Loop through all polys in check list to find a possible intersection
+    vector<int> intersectList;
+    set<int>::iterator it;
+    double s;
+    for (it=polyListCheck.begin(); it!=polyListCheck.end(); ++it) {
+        int polyLabel = *it;
+        if (polyList[polyLabel].rayPlaneIntersectPoint(ray,true)) {
+            intersectList.push_back(polyLabel); } 
+    }
     return intersectList;
 }
 
