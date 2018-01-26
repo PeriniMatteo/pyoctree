@@ -260,10 +260,10 @@ cOctNode::cOctNode()
     inside = false;
     position.resize(3,0.0);
     getLowUppVerts();
-    data.reserve(100);
+    data.reserve(10);
 }
 
-cOctNode::cOctNode(int _level, string _nid, vector<double> _position, double _size)
+cOctNode::cOctNode(int _level, string _nid, vector<double> _position, double _size, int _n_max_tri=10)
 {
     // octNode constructor with level, node id (nid), position and size
     level    = _level;
@@ -272,7 +272,7 @@ cOctNode::cOctNode(int _level, string _nid, vector<double> _position, double _si
     size     = _size;
     inside   = false;
     getLowUppVerts();
-    data.reserve(100);    
+    data.reserve(_n_max_tri);    
 }
 
 // octNode destructor
@@ -303,9 +303,9 @@ void cOctNode::addPoly(int _indx) { data.push_back(_indx); }
 
 int cOctNode::numPolys() { return (int)(data.size()); }
 
-void cOctNode::addNode(int _level, string _nid, vector<double> _position, double _size)
+void cOctNode::addNode(int _level, string _nid, vector<double> _position, double _size, int _n_max_tri=10)
 {
-    branches.push_back(cOctNode(_level,_nid,_position,_size));
+    branches.push_back(cOctNode(_level,_nid,_position,_size, _n_max_tri));
 }
 
 bool cOctNode::sphereRayIntersect(cLine &ray)
@@ -395,7 +395,7 @@ cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _
     setupPolyList();    
     vector<double> position = getPositionRoot();
     double size = getSizeRoot();
-    root = cOctNode(1,"0", position, size);
+    root = cOctNode(1,"0", position, size, polyList.size());
     insertPolys();
 }
 
@@ -421,36 +421,29 @@ void cOctree::insertPoly(cOctNode &node, cTri &poly)
     
         if (poly.isInNode2(node)) {
         
-            //if (node.numPolys() < node.MAX_OCTNODE_OBJECTS) {
-            //if (node.numPolys() < 100) {
-            //    node.addPoly(poly.label);
-            //} else {
             node.addPoly(poly.label);
             if (node.level < MAX_OCTREE_LEVELS) {
                 splitNodeAndReallocate(node);
             }
-            //}
         }
         
     } else {
       
         for (unsigned int i=0; i<node.branches.size(); i++) {
-            //tp->push([this, &node, &poly, i] () {
-            //tp->synchronize(); 
+
             insertPoly(node.branches[i],poly);
-            //tp->end_synchronize();
-            //});
         }
-        //tp->wait();
     }
 }
 
 void cOctree::insertPolys()
 {
     for (int i=0; i<numPolys(); i++) {
-            insertPoly(root,polyList[i]);
+    
+        root.addPoly(polyList[i].label);
     }
-   
+    
+    splitNodeAndReallocate2(root);
 }
 
 vector<double> cOctree::getPositionRoot() {
@@ -522,6 +515,39 @@ void cOctree::splitNodeAndReallocate(cOctNode &node)
     }
     node.data.resize(0);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void cOctree::splitNodeAndReallocate2(cOctNode &node)
+{
+    if (node.numPolys()!=0 && node.level < MAX_OCTREE_LEVELS){
+        // Split node into 8 branches
+        vector<double> position(3);
+        for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
+            for (int j=0; j<3; j++) {
+                position[j] = node.position[j] + 0.25*node.size*branchOffsets[i][j]; }
+            string nid = node.nid + "-" + NumberToString(i);
+            node.addNode(node.level+1,nid,position,0.5*node.size, (int) node.numPolys()/2); 
+        }
+    }
+    // Reallocate date from node to branches
+    for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
+        for (int j=0; j<node.numPolys(); j++) {
+            int indx = node.data[j];
+            if (polyList[indx].isInNode2(node.branches[i])) {
+                node.branches[i].addPoly(indx);
+            }
+        }
+        if (node.branches[i].numPolys()!=0 && node.branches[i].level < MAX_OCTREE_LEVELS){
+            splitNodeAndReallocate2(node.branches[i]);
+        }   
+    }
+    node.data.resize(0);
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 vector<cOctNode*> cOctree::getNodesFromLabel(int polyLabel)
 {

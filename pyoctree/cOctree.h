@@ -57,12 +57,12 @@ public:
     vector<int> data;
     vector<double> low, upp;
     cOctNode();
-    cOctNode(int _level, string _nid, vector<double> _position, double _size);
+    cOctNode(int _level, string _nid, vector<double> _position, double _size, int _n_max_tri);
     ~cOctNode();
     bool isLeafNode();
     int numPolys();
     void addPoly(int _indx);
-    void addNode(int _level, string _nid, vector<double> _position, double _size);
+    void addNode(int _level, string _nid, vector<double> _position, double _size, int _n_max_tri);
     void getLowUppVerts();
     bool boxRayIntersect(cLine &ray);
     bool sphereRayIntersect(cLine &ray);
@@ -122,6 +122,7 @@ public:
     void insertPolys();
     void setupPolyList();
     void splitNodeAndReallocate(cOctNode &node);
+    void splitNodeAndReallocate2(cOctNode &node);
     void findBranchesByLabel(int polyLabel, cOctNode &node, vector<cOctNode*> &nodeList);
     void findIfLeaf(cOctNode &node, vector<cOctNode*> &nodeList);
     void findNodes(cOctNode &node, vector<cOctNode*> &nodeList);
