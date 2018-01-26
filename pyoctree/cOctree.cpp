@@ -5,6 +5,7 @@
 
 #include "cOctree.h"
 #include "tribox_lib_v2.c"
+//#include "tribox_lib.c"
 //#include "threadpool.hpp"
 
 //using namespace astp;
@@ -139,7 +140,7 @@ void cTri::getUpperVert()
     } 
 } 
 
-bool cTri::isInNode(cOctNode &node, bool useold)
+bool cTri::isInNode(cOctNode &node)
 {
     // Tests if bounding box of cTri is inside of or overlapping the given cOctNode
     // This is a simple test and even if bounding box is found to be inside the
@@ -169,7 +170,7 @@ bool cTri::isInRayZone(cLine &ray)
     return false;
 }
 
-bool cTri::isInNode(cOctNode &node)
+bool cTri::isInNode2(cOctNode &node)
 {
     // Tests if bounding box of cTri is inside of or overlapping the given cOctNode
     // This is a simple test and even if bounding box is found to be inside the
@@ -420,7 +421,7 @@ void cOctree::insertPoly(cOctNode &node, cTri &poly)
 {
     if (node.isLeafNode()) {
     
-        if (poly.isInNode(node)) {
+        if (poly.isInNode2(node)) {
         
             //if (node.numPolys() < node.MAX_OCTNODE_OBJECTS) {
             //if (node.numPolys() < 100) {
@@ -511,7 +512,7 @@ void cOctree::splitNodeAndReallocate(cOctNode &node)
     for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
         for (int j=0; j<node.numPolys(); j++) {
             int indx = node.data[j];
-            if (polyList[indx].isInNode(node.branches[i])) {
+            if (polyList[indx].isInNode2(node.branches[i])) {
                 //if (node.branches[i].numPolys() < node.MAX_OCTNODE_OBJECTS) {
                 if (node.branches[i].level < MAX_OCTREE_LEVELS) {
                     splitNodeAndReallocate(node.branches[i]);

@@ -174,7 +174,7 @@ int main ( int argc, char *argv[] ){
       std::vector<double> p1(3);
       vector<int> intersectList;
       for (cOctNode* &node : oct.get_Nodes()){
-        //if (node->isLeafNode()){
+        if (node->isLeafNode()){
           if (node->numPolys()==0){
             //std::cout << node->numPolys() << std::endl;
             for (int j=0;j<3; j++){
@@ -191,7 +191,7 @@ int main ( int argc, char *argv[] ){
           }else{
             node->inside = true;
           }
-        //}
+        }
       }
     }
     

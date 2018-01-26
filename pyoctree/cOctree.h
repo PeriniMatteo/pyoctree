@@ -79,8 +79,8 @@ public:
     cTri();
     cTri(int _label, vector<vector<double> > _vertices);
     ~cTri();
+    bool isInNode2(cOctNode &node);
     bool isInNode(cOctNode &node);
-    bool isInNode(cOctNode &node, bool useold);
     bool isInRayZone(cLine &ray);
     bool isPointInTri(vector<double> &p);
     bool rayPlaneIntersectPoint(cLine &ray, bool entryOnly);
