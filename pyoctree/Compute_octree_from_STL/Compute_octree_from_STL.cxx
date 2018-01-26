@@ -141,7 +141,7 @@ int main ( int argc, char *argv[] ){
   int max_points=2;
   int max_depth = atoi(argv[2]);
   
-  cOctree oct = cOctree(pointCoords, connectivity, max_points, max_depth);
+  cOctree oct = cOctree(pointCoords, connectivity, max_depth);
 
   vector<cOctNode*> n = oct.get_Nodes();
   //std::cout << "Number of nodes = " << n.size() << std::endl;

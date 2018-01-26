@@ -260,20 +260,19 @@ cOctNode::cOctNode()
     inside = false;
     position.resize(3,0.0);
     getLowUppVerts();
-    data.reserve(MAX_OCTNODE_OBJECTS);
+    data.reserve(100);
 }
 
-cOctNode::cOctNode(int _level, string _nid, vector<double> _position, double _size, int max_points)
+cOctNode::cOctNode(int _level, string _nid, vector<double> _position, double _size)
 {
     // octNode constructor with level, node id (nid), position and size
-    MAX_OCTNODE_OBJECTS = max_points;
     level    = _level;
     nid      = _nid;
     position = _position;
     size     = _size;
     inside   = false;
     getLowUppVerts();
-    data.reserve(MAX_OCTNODE_OBJECTS);    
+    data.reserve(100);    
 }
 
 // octNode destructor
@@ -304,9 +303,9 @@ void cOctNode::addPoly(int _indx) { data.push_back(_indx); }
 
 int cOctNode::numPolys() { return (int)(data.size()); }
 
-void cOctNode::addNode(int _level, string _nid, vector<double> _position, double _size, int max_points)
+void cOctNode::addNode(int _level, string _nid, vector<double> _position, double _size)
 {
-    branches.push_back(cOctNode(_level,_nid,_position,_size, max_points));
+    branches.push_back(cOctNode(_level,_nid,_position,_size));
 }
 
 bool cOctNode::sphereRayIntersect(cLine &ray)
@@ -379,10 +378,9 @@ bool cOctNode::boxRayIntersect(cLine &ray)
 // ------------------------------------------------------
 
 
-cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, int max_points, int max_depth = 10)
+cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, int max_depth = 10)
 {
     MAX_OCTREE_LEVELS = max_depth;
-    MAX_POINTS = max_points;
     vertexCoords3D    = _vertexCoords3D;
     polyConnectivity  = _polyConnectivity;
     int _offsets[][3] = {{-1,-1,-1},{+1,-1,-1},{-1,+1,-1},{+1,+1,-1},
@@ -397,7 +395,7 @@ cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _
     setupPolyList();    
     vector<double> position = getPositionRoot();
     double size = getSizeRoot();
-    root = cOctNode(1,"0", position, size, MAX_POINTS);
+    root = cOctNode(1,"0", position, size);
     insertPolys();
 }
 
@@ -505,7 +503,7 @@ void cOctree::splitNodeAndReallocate(cOctNode &node)
         for (int j=0; j<3; j++) {
             position[j] = node.position[j] + 0.25*node.size*branchOffsets[i][j]; }
         string nid = node.nid + "-" + NumberToString(i);
-        node.addNode(node.level+1,nid,position,0.5*node.size, this->MAX_POINTS); 
+        node.addNode(node.level+1,nid,position,0.5*node.size); 
     }
     
     // Reallocate date from node to branches
