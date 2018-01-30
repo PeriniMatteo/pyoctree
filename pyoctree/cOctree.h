@@ -46,7 +46,6 @@ public:
 class cOctNode {
 public:
 
-    //int MAX_OCTNODE_OBJECTS  = 200;
     static const int NUM_BRANCHES_OCTNODE = 8;  
     double size;
     bool inside;
@@ -84,6 +83,7 @@ public:
     bool isInRayZone(cLine &ray);
     bool isPointInTri(vector<double> &p);
     bool rayPlaneIntersectPoint(cLine &ray, bool entryOnly);
+    bool rayPlaneIntersectPoint2(cLine &ray);
     bool rayPlaneIntersectPoint(cLine &ray, vector<double> &p, double &s);
     void getN();
     void getD();
@@ -95,7 +95,6 @@ class cOctree {
 public:
 
     int MAX_OCTREE_LEVELS = 10;
-    //int MAX_POINTS;
     int branchOffsets[8][3];
     cOctNode root;
     vector<vector<double> > vertexCoords3D;
@@ -109,6 +108,7 @@ public:
     cOctNode* findBranchById(string nodeId, cOctNode &node);
     set<int> getListPolysToCheck(cLine &ray);    
     set<int> getListPolysToCheck2(cLine &ray);    
+    set<int> getListPolysToCheck3(cLine &ray);    
     vector<double> getPositionRoot();	
     vector<Intersection> findRayIntersect(cLine &ray);    
     vector<int> findRayIntersect2(cLine &ray);    
@@ -128,6 +128,7 @@ public:
     void findNodes(cOctNode &node, vector<cOctNode*> &nodeList);
     void getPolysToCheck(cOctNode &node, cLine &ray, set<int> &intTestPolys);
     void getPolysToCheck2(cLine &ray, set<int> &intTestPolys);
+    void getPolysToCheck3(cLine &ray, set<int> &intTestPolys);
     void getNodesToCheck(cOctNode &node, cLine &ray, vector<pair<cOctNode*,double> > &nodeList);
 };
 

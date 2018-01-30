@@ -5,7 +5,6 @@
 
 #include "cOctree.h"
 #include "tribox_lib_v2.c"
-//#include "tribox_lib.c"
 //#include "threadpool.hpp"
 
 //using namespace astp;
@@ -55,7 +54,7 @@ void cLine::getP1()
     // Get a point on the cLine, p1, located 1.0 units away from the origin, p0
     vector<double> p1(3);
     for (unsigned int i=0; i<3; i++)
-        p1[i] = p0[i]+dir[i];
+        p1[i] = p0[i]+100*dir[i];
 }
 
 // ------------------------------------------------------
@@ -230,6 +229,47 @@ bool cTri::rayPlaneIntersectPoint(cLine &ray, bool entryOnly=false)
         return isPointInTri(p);
     } 
     return false;
+}
+
+bool cTri::rayPlaneIntersectPoint2(cLine &ray)
+{
+    // Tests if ray intersects with the cTri face
+    // NOTE: Using Möller–Trumbore ray-triangle intersection algorithm
+    
+    const float EPSILON = 0.00000001; 
+    vector<double> edge1, edge2, h, s, q;
+    vector<double> rayVector = ray.dir;
+    double a,f,u,v;
+    for (int i=0; i<3; i++){
+      edge1.push_back(vertices[1][i] - vertices[0][i]);
+      edge2.push_back(vertices[2][i] - vertices[0][i]);
+    }
+    h = crossProduct(rayVector,edge2);
+    a = dotProduct(edge1,h);
+    
+    if (a > -EPSILON && a < EPSILON)
+        return false;
+    
+    f = 1/a;
+    for (int i=0; i<3; i++){
+      s.push_back(ray.p0[i] - vertices[0][i]);
+    }
+    u = f * (dotProduct(s,h));
+    if (u < 0.0 || u > 1.0)
+        return false;
+    q = crossProduct(s,edge1);
+    v = f * dotProduct(rayVector,q);
+    if (v < 0.0 || u + v > 1.0)
+        return false;
+    // At this stage we can compute t to find out where the intersection point is on the line.
+    float t = f * dotProduct(edge2,q);
+    if (t > EPSILON) // ray intersection
+    {
+        //outIntersectionPoint = rayOrigin + rayVector * t; 
+        return true;
+    }
+    else // This means that there is a line intersection but not a ray intersection.
+        return false;
 }
 
 bool cTri::rayPlaneIntersectPoint(cLine &ray, vector<double> &p, double &s)
@@ -653,6 +693,14 @@ set<int> cOctree::getListPolysToCheck2(cLine &ray)
     return intTestPolys;
 }
 
+set<int> cOctree::getListPolysToCheck3(cLine &ray)
+{
+    // Returns a list of all polygons that are within OctNodes hit by a given ray
+    set<int> intTestPolys;
+    getPolysToCheck3(ray,intTestPolys);
+    return intTestPolys;
+}
+
 void cOctree::getPolysToCheck(cOctNode &node, cLine &ray, set<int> &intTestPolys)
 {
     // Utility function for getListPolysToCheck. Finds all OctNodes hit by a given ray
@@ -676,6 +724,16 @@ void cOctree::getPolysToCheck2(cLine &ray, set<int> &intTestPolys)
         if (p.isInRayZone(ray)){
             intTestPolys.insert(p.label);
         }
+    }
+    
+}
+
+void cOctree::getPolysToCheck3(cLine &ray, set<int> &intTestPolys)
+{
+    for (cTri &p : this->polyList){
+        //if (p.isInRayZone(ray)){
+            intTestPolys.insert(p.label);
+        //}
     }
     
 }
@@ -743,15 +801,17 @@ vector<Intersection> cOctree::findRayIntersect(cLine &ray)
 vector<int> cOctree::findRayIntersect2(cLine &ray)
 {   
     // Get polys to check
+    //set<int> polyListCheck = getListPolysToCheck(ray);
     set<int> polyListCheck = getListPolysToCheck2(ray);
     
     // Loop through all polys in check list to find a possible intersection
     vector<int> intersectList;
     set<int>::iterator it;
     double s;
-    for (it=polyListCheck.begin(); it!=polyListCheck.end(); ++it) {
-        int polyLabel = *it;
-        if (polyList[polyLabel].rayPlaneIntersectPoint(ray,true)) {
+    //for (it=polyListCheck.begin(); it!=polyListCheck.end(); ++it) {
+    for (int polyLabel : polyListCheck) {
+        //int polyLabel = *it;
+        if (polyList[polyLabel].rayPlaneIntersectPoint2(ray)) {
             intersectList.push_back(polyLabel); } 
     }
     return intersectList;
