@@ -81,6 +81,7 @@ public:
     bool isInNode2(cOctNode &node);
     bool isInNode(cOctNode &node);
     bool isInRayZone(cLine &ray);
+    bool isInRayZone2(cLine &ray);
     bool isPointInTri(vector<double> &p);
     bool rayPlaneIntersectPoint(cLine &ray, bool entryOnly);
     bool rayPlaneIntersectPoint2(cLine &ray);

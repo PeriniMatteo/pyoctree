@@ -153,14 +153,30 @@ bool cTri::isInNode(cOctNode &node)
     return true;
 }
 
+bool cTri::isInRayZone2(cLine &ray)
+{
+    // Tests if bounding box of cTri is inside of or overlapping the given cOctNode
+    // This is a simple test and even if bounding box is found to be inside the
+    // cOctNode, the cTri itself may not be
+    if (lowVert[0] > ray.p0[0]) return false;
+    if (lowVert[1] > ray.p0[1]) return false;
+    if (uppVert[0] < ray.p0[0]) return false;
+    if (uppVert[1] < ray.p0[1]) return false;
+    if (uppVert[2] < ray.p0[2]) return false;
+    return true;
+}
+
 bool cTri::isInRayZone(cLine &ray)
 {
     // Tests if bounding box of cTri is inside of or overlapping the given cOctNode
     // This is a simple test and even if bounding box is found to be inside the
     // cOctNode, the cTri itself may not be
     //std::cout << this->label << std::endl; 
-    if (((lowVert[0] < ray.p0[0]) && (uppVert[0] > ray.p0[0])) &&
-        ((lowVert[1] < ray.p0[1]) && (uppVert[1] > ray.p0[1]))) {
+    if (
+        ((lowVert[0] <= ray.p0[0]) && (uppVert[0] >= ray.p0[0])) 
+        && ((lowVert[1] <= ray.p0[1]) && (uppVert[1] >= ray.p0[1])) 
+        //&& (lowVert[2] >= ray.p0[2])
+        ) {
         //std::cout << "xxx" << std::endl; 
         return true;
     }
@@ -219,7 +235,7 @@ bool cTri::rayPlaneIntersectPoint(cLine &ray, bool entryOnly=false)
     // Tests if ray intersects with the cTri face
     // NOTE: Provide option to just check for entry intersections, not both 
     //       entries/exits. This should cut down checking somewhat.
-    double tol  = 1.0e-06;
+    double tol  = 1.0e-08;
     double sDen = dotProduct(ray.dir,N);
     if ((entryOnly && sDen>tol) || (!entryOnly && fabs(sDen)>tol))
     {
@@ -236,7 +252,7 @@ bool cTri::rayPlaneIntersectPoint2(cLine &ray)
     // Tests if ray intersects with the cTri face
     // NOTE: Using Möller–Trumbore ray-triangle intersection algorithm
     
-    const float EPSILON = 0.00000001; 
+    const float EPSILON = 0.0000000001; 
     vector<double> edge1, edge2, h, s, q;
     vector<double> rayVector = ray.dir;
     double a,f,u,v;
@@ -721,7 +737,7 @@ void cOctree::getPolysToCheck(cOctNode &node, cLine &ray, set<int> &intTestPolys
 void cOctree::getPolysToCheck2(cLine &ray, set<int> &intTestPolys)
 {
     for (cTri &p : this->polyList){
-        if (p.isInRayZone(ray)){
+        if (p.isInRayZone2(ray)){
             intTestPolys.insert(p.label);
         }
     }

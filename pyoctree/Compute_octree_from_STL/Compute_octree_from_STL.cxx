@@ -174,8 +174,8 @@ int main ( int argc, char *argv[] ){
                                                   {-1,+1,+1}};
 
     if (tree_type == 2){
-      // If you do not compute that, the value of inside is false for all nodes!
-      double r = oct.root.size * 2;
+      // If you do not compute the following code, the value of inside is false for all nodes!
+      double r = oct.root.size * 20;
       std::vector<double> p0(3);
       std::vector<double> p1(3);
       vector<int> intersectList;
@@ -186,7 +186,11 @@ int main ( int argc, char *argv[] ){
             p1[j]= node->position[j];
           }
           p1[2] = p1[2] + r;
-          cLine ray = cLine(p0,p1,0);
+          p1[0] = 0.0;
+          p1[1] = 0.0;
+          p1[2] = r;
+          
+          cLine ray = cLine(p0,p1,1);
           intersectList = oct.findRayIntersect2(ray);
           int numInts = intersectList.size();
           node->inside = (numInts % 2 == 1);
