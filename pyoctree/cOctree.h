@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <vector>
+#include <array>
 #include <set>
 #include <stdlib.h>
 #include <stdio.h>
@@ -96,7 +97,7 @@ class cOctree {
 public:
 
     int MAX_OCTREE_LEVELS = 10;
-    int branchOffsets[8][3];
+    std::array<std::array<int, 3>, 8>  branchOffsets;
     cOctNode root;
     vector<vector<double> > vertexCoords3D;
     vector<vector<int> > polyConnectivity;
@@ -118,6 +119,7 @@ public:
     vector<cOctNode*> getNodesFromLabel(int polyLabel);	
     vector<cOctNode*> getSortedNodesToCheck(cLine &ray);
     vector<cOctNode*> get_Leafs();
+    vector<cOctNode*> get_Inside();
     vector<cOctNode*> get_Nodes();
     void insertPoly(cOctNode &node, cTri &poly);
     void insertPolys();
@@ -126,11 +128,14 @@ public:
     void splitNodeAndReallocate2(cOctNode &node);
     void findBranchesByLabel(int polyLabel, cOctNode &node, vector<cOctNode*> &nodeList);
     void findIfLeaf(cOctNode &node, vector<cOctNode*> &nodeList);
+    void findIfInside(cOctNode &node, vector<cOctNode*> &nodeList);
     void findNodes(cOctNode &node, vector<cOctNode*> &nodeList);
     void getPolysToCheck(cOctNode &node, cLine &ray, set<int> &intTestPolys);
     void getPolysToCheck2(cLine &ray, set<int> &intTestPolys);
     void getPolysToCheck3(cLine &ray, set<int> &intTestPolys);
     void getNodesToCheck(cOctNode &node, cLine &ray, vector<pair<cOctNode*,double> > &nodeList);
+    
+    static std::array<std::array<int, 3>, 8> getBranchOffset();
 };
 
 // Function prototypes
