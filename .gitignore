@@ -70,3 +70,6 @@ pyoctree/Compute_octree_from_STL/CMakeCache.txt
 pyoctree/Compute_octree_from_STL/CMakeFiles/
 pyoctree/Compute_octree_from_STL/Makefile
 pyoctree/Compute_octree_from_STL/cmake_install.cmake
+
+pyoctree/main
+
