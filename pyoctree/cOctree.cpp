@@ -145,8 +145,8 @@ void cTri::getUpperVert()
   } 
 } 
 
-bool cTri::isInNode(cOctNode &node)
-{
+bool
+cTri::isInNode(cOctNode &node) {
   // Tests if bounding box of cTri is inside of or overlapping the given cOctNode
   // This is a simple test and even if bounding box is found to be inside the
   // cOctNode, the cTri itself may not be
@@ -159,8 +159,8 @@ bool cTri::isInNode(cOctNode &node)
   return true;
 }
 
-bool cTri::isInRayZone2(cLine &ray)
-{
+bool
+cTri::isInRayZone2(cLine &ray) {
   // Tests if bounding box of cTri is inside of or overlapping the given cOctNode
   // This is a simple test and even if bounding box is found to be inside the
   // cOctNode, the cTri itself may not be
@@ -172,8 +172,8 @@ bool cTri::isInRayZone2(cLine &ray)
   return true;
 }
 
-bool cTri::isInRayZone(cLine &ray)
-{
+bool
+cTri::isInRayZone(cLine &ray) {
   // Tests if bounding box of cTri is inside of or overlapping the given cOctNode
   // This is a simple test and even if bounding box is found to be inside the
   // cOctNode, the cTri itself may not be
@@ -832,7 +832,6 @@ vector<int> cOctree::findRayIntersect2(cLine &ray)
   // Loop through all polys in check list to find a possible intersection
   vector<int> intersectList;
   set<int>::iterator it;
-  double s;
   for (int polyLabel : polyListCheck) {
     if (polyList[polyLabel].rayPlaneIntersectPoint2(ray)) {
       intersectList.push_back(polyLabel);
@@ -902,7 +901,7 @@ vector<int> cOctree::findRayIntersectsSorted(vector<cLine> &rayList)
 
 // ------------------------------------------------------
 
-double dotProduct(vector<double> &v1, vector<double> &v2)
+double dotProduct(vector<double> const &v1, vector<double> const &v2)
 {
   // Calculates dot product v1.v2
   double dp=0.0;
@@ -911,7 +910,7 @@ double dotProduct(vector<double> &v1, vector<double> &v2)
   return dp;
 }
 
-double distBetweenPoints(vector<double> &p1, vector<double> &p2)
+double distBetweenPoints(vector<double> const &p1, vector<double> const &p2)
 {
   // Calculate the distance between points p1 and p2, |p1-p2|
   double sum=0.0;
@@ -921,7 +920,8 @@ double distBetweenPoints(vector<double> &p1, vector<double> &p2)
   return sum;
 }
 
-vector<double> crossProduct(vector<double> &v1, vector<double> &v2)
+vector<double>
+crossProduct( vector<double> const & v1, vector<double> const & v2 )
 {
   // Calculates cross product v1xv2
   vector<double> cp(3);
@@ -931,13 +931,14 @@ vector<double> crossProduct(vector<double> &v1, vector<double> &v2)
   return cp;
 }
 
-vector<double> vectAdd( vector<double> &a, vector<double> &b )
+vector<double>
+vectAdd( vector<double> const &a, vector<double> const &b )
 {
   // Vector addition, c=a+b
   return vectAdd(a, b, 1.0);
 }
 
-vector<double> vectAdd( vector<double> &a, vector<double> &b, double sf )
+vector<double> vectAdd( vector<double> const &a, vector<double> const &b, double sf )
 {
   // vector addition and scaling, c=a+sf*b
   vector<double> c(a.size());
@@ -945,7 +946,7 @@ vector<double> vectAdd( vector<double> &a, vector<double> &b, double sf )
     c[i] = a[i] + sf*b[i];
   return c;
 }
-vector<double> vectSubtract( vector<double> &a, vector<double> &b )
+vector<double> vectSubtract( vector<double> const &a, vector<double> const &b )
 {
   // Vector subtraction, c=a-b
   vector<double> c(a.size());

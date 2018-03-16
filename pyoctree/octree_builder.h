@@ -28,12 +28,10 @@
 
 //#include "cOctree.cpp"
 
+cOctree
+oct_builder ( string name, int md, int insid){
 
-cOctree oct_builder ( string name, int md, int insid){
-
-  bool fsave = false;
   int tree_type;
-
 
   std::string inputFilename = name;
 
@@ -80,14 +78,19 @@ cOctree oct_builder ( string name, int md, int insid){
   
   vector<cOctNode*> l = oct.get_Leafs();
   std::cout << "Number of leafs = " << l.size() << std::endl;
-  
 
+#ifdef __GCC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-braces"
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-braces"
+#endif
 
-
-    
-  std::vector<std::array<double,3>>  vertexCoords;
+  std::vector<std::array<double,3>> vertexCoords;
   vector<std::array<int,8>>         vertexConnect;
-  std::vector<std::array<double,3>>  offsets = {{-1,-1,-1},
+  std::vector<std::array<double,3>> offsets = {{-1,-1,-1},
                                                 {+1,-1,-1},
                                                 {+1,+1,-1},
                                                 {-1,+1,-1},
@@ -95,6 +98,13 @@ cOctree oct_builder ( string name, int md, int insid){
                                                 {+1,-1,+1},
                                                 {+1,+1,+1},
                                                 {-1,+1,+1}};
+
+#ifdef __GCC__
+#pragma GCC diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
   tree_type = insid;
   

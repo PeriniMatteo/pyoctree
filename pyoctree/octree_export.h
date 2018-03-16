@@ -18,6 +18,18 @@
 #include <string>
 //#include "cOctree.h"
 
+
+
+#ifdef __GCC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-braces"
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-braces"
+#endif
+
+
 void getNodeRep(cOctNode &node, 
                 std::vector<std::array<double,3>>    &vertexCoords, 
                 vector<std::array<int,8>>            &vertexConnect, 
@@ -41,6 +53,13 @@ void getNodeRep(cOctNode &node,
                           connect[6],
                           connect[7]});
 }
+
+#ifdef __GCC__
+#pragma GCC diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 void getTree(cOctNode &node, 
             std::vector<std::array<double,3>>    &vertexCoords, 
@@ -97,7 +116,17 @@ int oct_save ( cOctree oct, int mode, string output_file ){
   int tree_type;
   tree_type = mode;
   string output_file_name = output_file;
-    
+
+
+#ifdef __GCC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-braces"
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-braces"
+#endif
+
   std::vector<std::array<double,3>>  vertexCoords;
   vector<std::array<int,8>>         vertexConnect;
   std::vector<std::array<double,3>>  offsets = {{-1,-1,-1},
@@ -109,7 +138,14 @@ int oct_save ( cOctree oct, int mode, string output_file ){
                                                 {+1,+1,+1},
                                                 {-1,+1,+1}};
 
-  
+
+#ifdef __GCC__
+#pragma GCC diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+
   // Call iterative function 
   switch ( tree_type  ) {
 
