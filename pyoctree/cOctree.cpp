@@ -289,6 +289,53 @@ bool cTri::rayPlaneIntersectPoint2(cLine &ray)
     return false;
 }
 
+vector<double> cTri::rayPlaneIntersectPointPosition(cLine &ray)
+{
+  // Tests if ray intersects with the cTri face
+  // NOTE: Using Möller–Trumbore ray-triangle intersection algorithm
+  
+  const float EPSILON = 0.0000000001; 
+  vector<double> zeroVector = {0.0, 0.0, 0.0};
+  vector<double> edge1, edge2, h, s, q;
+  vector<double> rayVector = ray.dir;
+  double a,f,u,v;
+  for (int i=0; i<3; i++){
+    edge1.push_back(vertices[1][i] - vertices[0][i]);
+    edge2.push_back(vertices[2][i] - vertices[0][i]);
+  }
+  h = crossProduct(rayVector,edge2);
+  a = dotProduct(edge1,h);
+  
+  if (a > -EPSILON && a < EPSILON)
+    return zeroVector;
+  
+  f = 1/a;
+  for (int i=0; i<3; i++){
+    s.push_back(ray.p0[i] - vertices[0][i]);
+  }
+  u = f * (dotProduct(s,h));
+  if (u < 0.0 || u > 1.0)
+    return zeroVector;
+  q = crossProduct(s,edge1);
+  v = f * dotProduct(rayVector,q);
+  if (v < 0.0 || u + v > 1.0)
+    return zeroVector;
+  // At this stage we can compute t to find out where the intersection point is on the line.
+  float t = f * dotProduct(edge2,q);
+  if (t > EPSILON) {
+    // ray intersection
+    double tt = static_cast<double>(t);
+    vector<double> IPoint = {0.0, 0.0, 0.0};
+    for (int i=0; i<3; i++){
+      IPoint[i] = ray.p0[i] + rayVector[i] * tt;
+    }
+    return IPoint; 
+    //return true;
+  }
+  else // This means that there is a line intersection but not a ray intersection.
+    return zeroVector;
+}
+
 bool cTri::rayPlaneIntersectPoint(cLine &ray, vector<double> &p, double &s)
 {
   // Tests if ray intersects with the cTri face 
@@ -835,7 +882,22 @@ vector<int> cOctree::findRayIntersect2(cLine &ray)
   double s;
   for (int polyLabel : polyListCheck) {
     if (polyList[polyLabel].rayPlaneIntersectPoint2(ray)) {
-      intersectList.push_back(polyLabel);
+      /*vector<double> zeroVector = {0.0, 0.0, 0.0};
+      vector<double> pos = polyList[polyLabel].rayPlaneIntersectPointPosition(ray);
+      if ( pos != zeroVector) {
+        bool ck = false;
+        for (int pl : intersectList) {
+          if (pos[3] - polyList[pl].rayPlaneIntersectPointPosition(ray)[3] > 0.00001 ){
+            ck = ck && false;
+          }else{
+            ck = ck && true;
+          }
+        }
+        if (ck == false){
+          intersectList.push_back(polyLabel);
+        }
+      }*/
+    intersectList.push_back(polyLabel);
     } 
   }
   return intersectList;

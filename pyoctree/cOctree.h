@@ -86,6 +86,7 @@ public:
     bool isPointInTri(vector<double> &p);
     bool rayPlaneIntersectPoint(cLine &ray, bool entryOnly);
     bool rayPlaneIntersectPoint2(cLine &ray);
+    vector<double> rayPlaneIntersectPointPosition(cLine &ray);
     bool rayPlaneIntersectPoint(cLine &ray, vector<double> &p, double &s);
     void getN();
     void getD();

@@ -1,19 +1,19 @@
 
-#include "vtkXMLUnstructuredGridWriter.h"
-#include <vtkPolyData.h>
+//#include "vtkXMLUnstructuredGridWriter.h"
+//#include <vtkPolyData.h>
 #include <vtkSTLReader.h>
 #include <vtkSmartPointer.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkActor.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderer.h>
-#include <vtkRenderWindowInteractor.h>
-#include <vtkDataSet.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkActor.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderer.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkDataSet.h>
 #include <vtkCell.h>
-#include <vtkUnstructuredGrid.h>
-#include <vtkFloatArray.h>
-#include <vtkPoints.h>
-#include <vtkHexahedron.h>
+//#include <vtkUnstructuredGrid.h>
+//#include <vtkFloatArray.h>
+//#include <vtkPoints.h>
+//#include <vtkHexahedron.h>
 
 #include <iostream>
 #include <vector>
