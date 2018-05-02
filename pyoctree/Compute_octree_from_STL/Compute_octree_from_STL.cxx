@@ -17,6 +17,15 @@
 #include <array>
 #include "../cOctree.cpp"
 
+///////////////////////////////////////////////////////
+//  Compute_octree_from_STL 
+//                      name.stl 
+//                      max_depth(2-)
+//                      save_or_not(0-1)
+//                      export_cells all(0) skin(1) inside(2)   
+///////////////////////////////////////////////////////
+
+
 void getNodeRep(cOctNode &node, 
                 std::vector<std::array<double,3>>    &vertexCoords, 
                 vector<std::array<int,8>>            &vertexConnect, 
@@ -102,6 +111,8 @@ int main ( int argc, char *argv[] ){
   
   if (atoi(argv[3])==1){
     fsave = true;
+  }else if(atoi(argv[3])==0){
+    fsave = false;
   }else{
     cout << "Error: Saving parameter must be 0 or 1" << endl;
   }
@@ -153,10 +164,10 @@ int main ( int argc, char *argv[] ){
   cOctree oct = cOctree(pointCoords, connectivity, max_depth);
 
   vector<cOctNode*> n = oct.get_Nodes();
-  //std::cout << "Number of nodes = " << n.size() << std::endl;
+  std::cout << "Number of nodes = " << n.size() << std::endl;
   
   vector<cOctNode*> l = oct.get_Leafs();
-  //std::cout << "Number of leafs = " << l.size() << std::endl;
+  std::cout << "Number of leafs = " << l.size() << std::endl;
   
 
 
@@ -214,7 +225,7 @@ int main ( int argc, char *argv[] ){
       case 2: 
         getInside(oct.root, vertexCoords, vertexConnect, offsets);
       break;
-}
+    }
     
     std::cout << "Number of coords = " << vertexCoords.size() << std::endl;
     std::cout << "Number of connects = " << vertexConnect.size() << std::endl;
