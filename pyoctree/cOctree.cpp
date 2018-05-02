@@ -504,6 +504,18 @@ cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _
   root = cOctNode(1,"0", position, size, polyList.size());
   insertPolys();
 }
+cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, vector<double> _position, double _size, int max_depth = 10)
+{
+  MAX_OCTREE_LEVELS = max_depth;
+  vertexCoords3D    = _vertexCoords3D;
+  polyConnectivity  = _polyConnectivity;
+  branchOffsets = cOctree::getBranchOffset();
+  setupPolyList();    
+  vector<double> position = _position;
+  double size = _size;
+  root = cOctNode(1,"0", position, size, polyList.size());
+  insertPolys();
+}
 
 void cOctree::setupPolyList()
 {

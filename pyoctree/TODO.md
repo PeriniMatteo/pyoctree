@@ -1,6 +1,6 @@
 #TODO list
 
-* ### Extend bounding box of the octree in case of multiple meshes
+* ###~~ Extend bounding box of the octree in case of multiple meshes~~
 
 * ### Using a Flag to define if a node is "in plus" or not
 
