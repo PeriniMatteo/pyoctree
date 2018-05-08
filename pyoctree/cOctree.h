@@ -3,6 +3,9 @@
 
 // This file is part of pyoctree - See LICENSE.txt for information on usage and redistribution
 
+#ifndef CLASS_COCTREE
+#define CLASS_COCTREE
+
 #include <iostream>
 #include <vector>
 #include <array>
@@ -116,8 +119,8 @@ public:
     vector<double> getPositionRoot();	
     vector<Intersection> findRayIntersect(cLine &ray);    
     vector<int> findRayIntersect2(cLine &ray);    
-    vector<int> findRayIntersects(vector<cLine> &rayList);
-    vector<int> findRayIntersectsSorted(vector<cLine> &rayList);		
+    //vector<int> findRayIntersects(vector<cLine> &rayList);
+    //vector<int> findRayIntersectsSorted(vector<cLine> &rayList);		
     vector<cOctNode*> getNodesFromLabel(int polyLabel);	
     vector<cOctNode*> getSortedNodesToCheck(cLine &ray);
     vector<cOctNode*> get_Leafs();
@@ -149,3 +152,5 @@ vector<double> crossProduct( vector<double> &v1, vector<double> &v2 );
 vector<double> vectAdd( vector<double> &a, vector<double> &b);
 vector<double> vectAdd( vector<double> &a, vector<double> &b, double sf);
 vector<double> vectSubtract( vector<double> &a, vector<double> &b );
+
+#endif

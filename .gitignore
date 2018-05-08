@@ -74,4 +74,5 @@ pyoctree/Compute_octree_from_STL/cmake_install.cmake
 pyoctree/main
 
 pyoctree/test_STEP/*
+*.step
 

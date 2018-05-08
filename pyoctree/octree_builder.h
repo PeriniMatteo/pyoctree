@@ -1,4 +1,7 @@
 
+#ifndef CLASS_OCT_BUILDER
+#define CLASS_OCT_BUILDER
+
 //#include "vtkXMLUnstructuredGridWriter.h"
 //#include <vtkPolyData.h>
 #include <vtkSTLReader.h>
@@ -24,14 +27,12 @@
 #include <string>
 #include <sstream>
 #include <algorithm> // find, sort
-#include <utility>  
-
-//#include "cOctree.cpp"
+#include <utility>
 
 
 cOctree oct_builder ( string name, int md, int insid){
 
-  bool fsave = false;
+  //bool fsave = false;
   int tree_type;
 
 
@@ -131,7 +132,7 @@ cOctree oct_builder ( string name, int md, int insid){
 
 cOctree oct_builder ( string name, int md, int insid, vector<double> _position, double _size){
 
-  bool fsave = false;
+  //bool fsave = false;
   int tree_type;
   vector<double> root_position = _position;
   double root_size = _size;
@@ -229,3 +230,5 @@ cOctree oct_builder ( string name, int md, int insid, vector<double> _position, 
 
   return oct;
 }
+
+#endif

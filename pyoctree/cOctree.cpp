@@ -4,7 +4,7 @@
 // This file is part of pyoctree - See LICENSE.txt for information on usage and redistribution
 
 #include "cOctree.h"
-#include "tribox_lib_v2.c"
+#include "tribox_lib_v2.h"
 //#include "threadpool.hpp"
 
 //using namespace astp;
@@ -891,7 +891,7 @@ vector<int> cOctree::findRayIntersect2(cLine &ray)
   // Loop through all polys in check list to find a possible intersection
   vector<int> intersectList;
   set<int>::iterator it;
-  double s;
+  //double s;
   for (int polyLabel : polyListCheck) {
     if (polyList[polyLabel].rayPlaneIntersectPoint2(ray)) {
       /*vector<double> zeroVector = {0.0, 0.0, 0.0};
@@ -915,7 +915,7 @@ vector<int> cOctree::findRayIntersect2(cLine &ray)
   return intersectList;
 }
 
-vector<int> cOctree::findRayIntersects(vector<cLine> &rayList)
+/*vector<int> cOctree::findRayIntersects(vector<cLine> &rayList)
 {
   // For each ray provided, determines if ray hits a poly in the tree and 
   // returns a boolean integer. Uses openmp to speed up the calculation
@@ -937,9 +937,9 @@ vector<int> cOctree::findRayIntersects(vector<cLine> &rayList)
     }
   }
   return foundIntsects;
-}
+}*/
 
-vector<int> cOctree::findRayIntersectsSorted(vector<cLine> &rayList)
+/*vector<int> cOctree::findRayIntersectsSorted(vector<cLine> &rayList)
 {
   // For each ray provided, determines if ray hits a poly in the tree and 
   // returns a boolean integer. 
@@ -972,7 +972,7 @@ vector<int> cOctree::findRayIntersectsSorted(vector<cLine> &rayList)
     } 
   }
   return foundIntsects;
-}
+}*/
 
 // ------------------------------------------------------
 

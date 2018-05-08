@@ -1,22 +1,6 @@
-#include "vtkXMLUnstructuredGridWriter.h"
-#include <vtkPolyData.h>
-//#include <vtkSTLReader.h>
-//#include <vtkSmartPointer.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkActor.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderer.h>
-#include <vtkRenderWindowInteractor.h>
-#include <vtkDataSet.h>
-//#include <vtkCell.h>
-#include <vtkUnstructuredGrid.h>
-#include <vtkFloatArray.h>
-#include <vtkPoints.h>
-#include <vtkHexahedron.h>
-#include <vector>
-#include <array>
-#include <string>
-//#include "cOctree.h"
+
+#ifndef CLASS_OCT_EXPORT
+#define CLASS_OCT_EXPORT
 
 void getNodeRep(cOctNode &node, 
                 std::vector<std::array<double,3>>    &vertexCoords, 
@@ -174,3 +158,5 @@ int oct_save ( cOctree oct, int mode, string output_file ){
     
   return EXIT_SUCCESS;
 }
+
+#endif
