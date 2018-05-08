@@ -17,7 +17,7 @@ TopoDS_Shape draw_node(cOctNode &node){
   return box;
 }
 
-void export_step_model(cOctree &o){
+void export_step_model(cOctree &o, string filename){
   BRep_Builder aB;
   TopoDS_Compound aResComp;
   aB.MakeCompound(aResComp);
@@ -28,7 +28,7 @@ void export_step_model(cOctree &o){
   // Write resulting compound to the file.
   STEPControl_Writer aWriter;
   IFSelect_ReturnStatus aStat = aWriter.Transfer(aResComp,STEPControl_AsIs);
-  aStat = aWriter.Write("res.stp");
+  aStat = aWriter.Write(filename.c_str());
   if(aStat != IFSelect_RetDone) cout << "Writing error" << endl;
 }
 

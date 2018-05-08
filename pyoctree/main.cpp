@@ -85,7 +85,7 @@ int main(){
   vector<double> oct_position = find_octree_position(first_mesh, second_mesh);
   double oct_size = find_octree_size(first_mesh, second_mesh);
   std::cout << "oct_size = " << oct_size << std::endl;
-  int level = 5;
+  int level = 4;
   //cOctree o1 =  oct_builder (first_mesh, level, 2);
   //cOctree o2 =  oct_builder (second_mesh, level, 2);
   cOctree o1 =  oct_builder (first_mesh, level, 2, oct_position, oct_size);
@@ -126,6 +126,6 @@ int main(){
   oct_save ( oo1, 2, "oo_diff.vtu" );
   oct_save ( oo2, 2, "oo_int.vtu" );
   
-  export_step_model(oo1);
+  export_step_model(oo1, "difference.step" );
   return 0;
 }
