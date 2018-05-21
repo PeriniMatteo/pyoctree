@@ -63,6 +63,7 @@ public:
     cOctNode(int _level, string _nid, vector<double> _position, double _size, int _n_max_tri);
     ~cOctNode();
     bool isLeafNode();
+    bool overlapsCube(vector<double> _position, double _size); 
     int numPolys();
     void addPoly(int _indx);
     void addNode(int _level, string _nid, vector<double> _position, double _size, int _n_max_tri);
@@ -101,6 +102,10 @@ class cOctree {
 public:
 
     int MAX_OCTREE_LEVELS = 10;
+    int MAX_OCTREE_CUBE_LEVELS = 10;
+    bool division;
+    vector<double> cube_pos;
+    double cube_size;
     std::array<std::array<int, 3>, 8>  branchOffsets;
     cOctNode root;
     vector<vector<double> > vertexCoords3D;
@@ -108,6 +113,7 @@ public:
     vector<cTri> polyList;
     cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, int max_depth);
     cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, vector<double> _position, double _size, int max_depth);
+    cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, vector<double> _position, double _size, vector<double> _position_cube, double _size_cube, int max_depth, int max_depth_cube);
     ~cOctree();    
     double getSizeRoot();
     int numPolys();

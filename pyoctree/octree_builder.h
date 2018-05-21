@@ -136,7 +136,7 @@ cOctree oct_builder ( string name, int md, int insid, vector<double> _position, 
   int tree_type;
   vector<double> root_position = _position;
   double root_size = _size;
-
+  
   std::string inputFilename = name;
 
   vtkSmartPointer<vtkSTLReader> reader =
@@ -176,6 +176,119 @@ cOctree oct_builder ( string name, int md, int insid, vector<double> _position, 
   int max_depth = md;
   
   cOctree oct = cOctree(pointCoords, connectivity, root_position, root_size, max_depth);
+
+  vector<cOctNode*> n = oct.get_Nodes();
+  std::cout << "Number of nodes = " << n.size() << std::endl;
+  
+  vector<cOctNode*> l = oct.get_Leafs();
+  std::cout << "Number of leafs = " << l.size() << std::endl;
+  
+
+
+
+    
+  std::vector<std::array<double,3>>  vertexCoords;
+  vector<std::array<int,8>>         vertexConnect;
+  std::vector<std::array<double,3>>  offsets = {{-1,-1,-1},
+                                                {+1,-1,-1},
+                                                {+1,+1,-1},
+                                                {-1,+1,-1},
+                                                {-1,-1,+1},
+                                                {+1,-1,+1},
+                                                {+1,+1,+1},
+                                                {-1,+1,+1}};
+
+  tree_type = insid;
+  
+  if (tree_type == 2){
+    std::cout << "inside" << std::endl;
+    // If you do not compute the following code, the value of inside is false for all nodes!
+    double r = oct.root.size * 20;
+    std::vector<double> p0(3);
+    std::vector<double> p1(3);
+    vector<int> intersectList;
+    for (cOctNode* &node : oct.get_Leafs()){
+      if (node->numPolys()==0){
+        for (int j=0;j<3; j++){
+          p0[j]= node->position[j];
+          p1[j]= node->position[j];
+        }
+        p1[2] = p1[2] + r;
+        p1[0] = 0.0;
+        p1[1] = 0.0;
+        p1[2] = r;
+        
+        cLine ray = cLine(p0,p1,1);
+        intersectList = oct.findRayIntersect2(ray);
+        int numInts = intersectList.size();
+        node->inside = (numInts % 2 == 1);
+      }else{
+        node->inside = true;
+      }
+    }
+  }
+
+  return oct;
+}
+
+cOctree oct_builder ( string name, int md, int insid, vector<double> _position, double _size, vector<double> _position_cube, double _size_cube, int md_cube){
+
+  //bool fsave = false;
+  int tree_type;
+  vector<double> root_position = _position;
+  double root_size = _size;
+  vector<double> cube_position = _position_cube;
+  double cube_size = _size_cube;
+  for (int i=0; i<3; i++) {
+    if (cube_position[i] - 0.5*cube_size < root_position[i] - 0.5*root_size || 
+        cube_position[i] + 0.5*cube_size> root_position[i] + 0.5*root_size) {
+          std::cout << "sub position out of range along axis : "<< i << std::endl; 
+          std::cout << "octree extensions min: " << root_position[i] - 0.5*root_size << std::endl; 
+          std::cout << "octree extensions max: " << root_position[i] + 0.5*root_size << std::endl; 
+          std::cout << "sub cube extensions min: " << cube_position[i] - 0.5*cube_size << std::endl; 
+          std::cout << "sub cube extensions max: " << cube_position[i] + 0.5*cube_size << std::endl; 
+        }
+  }
+  std::string inputFilename = name;
+
+  vtkSmartPointer<vtkSTLReader> reader =
+    vtkSmartPointer<vtkSTLReader>::New();
+
+  reader->SetFileName(inputFilename.c_str());
+  reader->Update();
+
+  auto stl = reader->GetOutput();
+  
+  int numPoints = stl->GetNumberOfPoints();
+  //std::cout << "Number of vertex = " << numPoints << std::endl;
+  
+  int numPolys     = stl->GetNumberOfCells();
+  //std::cout << "Number of faces  = " << numPolys << std::endl;
+  
+  std::vector<std::vector<double>> pointCoords(numPoints,std::vector<double>(3));
+  
+  for(vtkIdType i = 0; i < stl->GetNumberOfPoints(); i++){
+    double p[3];
+    stl->GetPoint(i,p);
+    for (int j=0; j<3; j++){
+      pointCoords[i][j] = p[j];
+    }
+  }
+  
+  std::vector<std::vector<int>> connectivity(numPolys,std::vector<int>(3));
+  
+  for(vtkIdType i = 0; i < stl->GetNumberOfCells(); i++){
+    auto atri = stl->GetCell(i);
+    auto ids = atri->GetPointIds();
+    for (int j=0; j<3; j++){
+      connectivity[i][j] = ids->GetId(j);
+    }
+  }
+  
+  int max_depth = md;
+  int max_depth_cube = md_cube;
+  
+  cOctree oct = cOctree(pointCoords, connectivity, root_position, root_size, cube_position, cube_size, max_depth, max_depth_cube);
 
   vector<cOctNode*> n = oct.get_Nodes();
   std::cout << "Number of nodes = " << n.size() << std::endl;

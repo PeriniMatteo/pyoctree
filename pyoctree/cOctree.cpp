@@ -391,6 +391,21 @@ bool cOctNode::isLeafNode()
   return branches.size()==0; 
 }
 
+bool cOctNode::overlapsCube(vector<double> _position, double _size)
+{ 
+  std::cout << "aaaa" << std::endl;
+  vector<double> pos = _position;
+  double siz = _size;
+  // Checks if the center of a cOctNode is inside a cube
+  if (pos[0] - 0.5*siz > position[0] + 0.5*size) return false;
+  if (pos[1] - 0.5*siz > position[1] + 0.5*size) return false;
+  if (pos[2] - 0.5*siz > position[2] + 0.5*size) return false;
+  if (pos[0] + 0.5*siz < position[0] - 0.5*size) return false;
+  if (pos[1] + 0.5*siz < position[1] - 0.5*size) return false;
+  if (pos[2] + 0.5*siz < position[2] - 0.5*size) return false;
+  return true;
+}
+
 void cOctNode::getLowUppVerts() 
 {
   // Get coordinates of the lower and upper vertices of the cOctNode
@@ -494,6 +509,8 @@ std::array<std::array<int, 3>, 8> cOctree::getBranchOffset(){
 
 cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, int max_depth = 10)
 {
+  std::cout << "no1" << std::endl;
+  division = false;
   MAX_OCTREE_LEVELS = max_depth;
   vertexCoords3D    = _vertexCoords3D;
   polyConnectivity  = _polyConnectivity;
@@ -506,7 +523,27 @@ cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _
 }
 cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, vector<double> _position, double _size, int max_depth = 10)
 {
+  std::cout << "no2" << std::endl;
+  division = false;
   MAX_OCTREE_LEVELS = max_depth;
+  vertexCoords3D    = _vertexCoords3D;
+  polyConnectivity  = _polyConnectivity;
+  branchOffsets = cOctree::getBranchOffset();
+  setupPolyList();    
+  vector<double> position = _position;
+  double size = _size;
+  root = cOctNode(1,"0", position, size, polyList.size());
+  insertPolys();
+}
+
+cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, vector<double> _position, double _size, vector<double> _position_cube, double _size_cube, int max_depth = 10, int max_depth_cube = 10)
+{
+  std::cout << "ok" << std::endl;
+  division = true;
+  MAX_OCTREE_LEVELS = max_depth;
+  vector<double> cube_pos = _position_cube;
+  double cube_size = _size_cube;
+  MAX_OCTREE_CUBE_LEVELS = max_depth_cube;
   vertexCoords3D    = _vertexCoords3D;
   polyConnectivity  = _polyConnectivity;
   branchOffsets = cOctree::getBranchOffset();
@@ -633,28 +670,84 @@ void cOctree::splitNodeAndReallocate(cOctNode &node)
 ////////////////////////////////////////////////////////////////////////////////
 void cOctree::splitNodeAndReallocate2(cOctNode &node)
 {
-  if (node.numPolys()!=0 && node.level < MAX_OCTREE_LEVELS){
-    // Split node into 8 branches
-    vector<double> position(3);
-    for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
-      for (int j=0; j<3; j++) {
-        position[j] = node.position[j] + 0.25*node.size*branchOffsets[i][j]; 
+  std::cout << "xxxxxx" << std::endl;
+  if (division){
+    std::cout << "yyyyyyy" << std::endl;
+    if (node.overlapsCube(cube_pos, cube_size)){
+      if (node.numPolys()!=0 && node.level < MAX_OCTREE_CUBE_LEVELS){
+        // Split node into 8 branches
+        vector<double> position(3);
+        for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
+          for (int j=0; j<3; j++) {
+            position[j] = node.position[j] + 0.25*node.size*branchOffsets[i][j]; 
+          }
+          string nid = node.nid + "-" + NumberToString(i);
+          node.addNode(node.level+1,nid,position,0.5*node.size, (int) node.numPolys()/2); 
+        }
       }
+      // Reallocate date from node to branches
+      for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
+        for (int j=0; j<node.numPolys(); j++) {
+          int indx = node.data[j];
+          if (polyList[indx].isInNode2(node.branches[i])) {
+            node.branches[i].addPoly(indx);
+          }
+        }
+        if (node.branches[i].numPolys()!=0 && node.branches[i].level < MAX_OCTREE_CUBE_LEVELS){
+          splitNodeAndReallocate2(node.branches[i]);
+        }   
+      }
+    }else{
+      std::cout << "wwwwwwww" << std::endl;
+      if (node.numPolys()!=0 && node.level < MAX_OCTREE_LEVELS){
+        // Split node into 8 branches
+        vector<double> position(3);
+        for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
+          for (int j=0; j<3; j++) {
+            position[j] = node.position[j] + 0.25*node.size*branchOffsets[i][j]; 
+          }
+          string nid = node.nid + "-" + NumberToString(i);
+          node.addNode(node.level+1,nid,position,0.5*node.size, (int) node.numPolys()/2); 
+        }
+      }
+      // Reallocate date from node to branches
+      for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
+        for (int j=0; j<node.numPolys(); j++) {
+          int indx = node.data[j];
+          if (polyList[indx].isInNode2(node.branches[i])) {
+            node.branches[i].addPoly(indx);
+          }
+        }
+        if (node.branches[i].numPolys()!=0 && node.branches[i].level < MAX_OCTREE_LEVELS){
+          splitNodeAndReallocate2(node.branches[i]);
+        }   
+      }
+    }
+  }else{
+    std::cout << "zzzzzzz" << std::endl;
+    if (node.numPolys()!=0 && node.level < MAX_OCTREE_LEVELS){
+      // Split node into 8 branches
+      vector<double> position(3);
+      for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
+        for (int j=0; j<3; j++) {
+          position[j] = node.position[j] + 0.25*node.size*branchOffsets[i][j]; 
+        }
       string nid = node.nid + "-" + NumberToString(i);
       node.addNode(node.level+1,nid,position,0.5*node.size, (int) node.numPolys()/2); 
-    }
-  }
-  // Reallocate date from node to branches
-  for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
-    for (int j=0; j<node.numPolys(); j++) {
-      int indx = node.data[j];
-      if (polyList[indx].isInNode2(node.branches[i])) {
-        node.branches[i].addPoly(indx);
       }
     }
-    if (node.branches[i].numPolys()!=0 && node.branches[i].level < MAX_OCTREE_LEVELS){
-      splitNodeAndReallocate2(node.branches[i]);
-    }   
+    // Reallocate date from node to branches
+    for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
+      for (int j=0; j<node.numPolys(); j++) {
+        int indx = node.data[j];
+        if (polyList[indx].isInNode2(node.branches[i])) {
+          node.branches[i].addPoly(indx);
+        }
+      }
+      if (node.branches[i].numPolys()!=0 && node.branches[i].level < MAX_OCTREE_LEVELS){
+        splitNodeAndReallocate2(node.branches[i]);
+      }   
+    }
   }
   node.data.resize(0);
 }

@@ -13,14 +13,14 @@
 #include <vtkHexahedron.h>
 
 //OpenCascade
-#include "BRepPrimAPI_MakeBox.hxx"
-#include "STEPControl_Writer.hxx"
+//#include "BRepPrimAPI_MakeBox.hxx"
+//#include "STEPControl_Writer.hxx"
 
 //My sources
 #include "cOctree.h"
 #include "octree_builder.h"
 #include "octree_export.h"
-#include "octree_export_STEP.h"
+//#include "octree_export_STEP.h"
 #include "booleans.h"
 
 vector<double> find_octree_position(string _first_mesh, string _second_mesh){
@@ -82,16 +82,30 @@ int main(){
   string first_mesh = "./Examples/cubex.stl";
   string second_mesh = "./Examples/torox.stl";
   string name;
-  vector<double> oct_position = find_octree_position(first_mesh, second_mesh);
-  double oct_size = find_octree_size(first_mesh, second_mesh);
+  //vector<double> oct_position = find_octree_position(first_mesh, second_mesh);
+  //double oct_size = find_octree_size(first_mesh, second_mesh);
+  vector<double> oct_position = find_octree_position(first_mesh, first_mesh);
+  double oct_size = find_octree_size(first_mesh, first_mesh);
   std::cout << "oct_size = " << oct_size << std::endl;
+  for (int i = 0; i<3; i++){
+    std::cout << "oct_position[" << i <<"] = " << oct_position[i] << std::endl; 
+  }
   int level = 4;
+  int level_cube = 5;
+  vector<double> cube_position = oct_position;
+  double cube_size = 0.3*oct_size;
+  std::cout << "cube_size = " << cube_size << std::endl;
+  for (int i = 0; i<3; i++){
+    std::cout << "cube_position[" << i <<"] = " << cube_position[i] << std::endl; 
+  }
   //cOctree o1 =  oct_builder (first_mesh, level, 2);
   //cOctree o2 =  oct_builder (second_mesh, level, 2);
-  cOctree o1 =  oct_builder (first_mesh, level, 2, oct_position, oct_size);
-  cOctree o2 =  oct_builder (second_mesh, level, 2, oct_position, oct_size);
+  //cOctree o1 =  oct_builder (first_mesh, level, 2, oct_position, oct_size);
+  //cOctree o2 =  oct_builder (second_mesh, level, 2, oct_position, oct_size);
+  cOctree o1 =  oct_builder (first_mesh, level, 2, oct_position, oct_size, cube_position, cube_size, level_cube);
+  //cOctree o2 =  oct_builder (second_mesh, level, 2, oct_position, oct_size, cube_position, cube_size, level_cube);
   
-  std::cout << "Leaf nodes of o1 : " << o1.get_Leafs().size() << std::endl;
+  /*std::cout << "Leaf nodes of o1 : " << o1.get_Leafs().size() << std::endl;
   std::cout << "Leaf nodes of o2 : " << o2.get_Leafs().size() << std::endl;
   //std::cout << NumberToString( 45 ) << std::endl;
 
@@ -119,13 +133,13 @@ int main(){
   std::cout << "inside nodes of oo2 : " << oo2.get_Inside().size() << std::endl;
   
   //oct_save ( o1, 0, "o_all.vtu" );
-  //oct_save ( o1, 1, "o_leaf.vtu" );
+  //oct_save ( o1, 1, "o_leaf.vtu" );*/
   oct_save ( o1, 1, "o1_inside.vtu" );
-  oct_save ( o2, 1, "o2_inside.vtu" );
-  oct_save ( oo, 2, "oo_sum.vtu" );
-  oct_save ( oo1, 2, "oo_diff.vtu" );
-  oct_save ( oo2, 2, "oo_int.vtu" );
+  //oct_save ( o2, 1, "o2_inside.vtu" );
+  //oct_save ( oo, 2, "oo_sum.vtu" );
+  //oct_save ( oo1, 2, "oo_diff.vtu" );
+  //oct_save ( oo2, 2, "oo_int.vtu" );
   
-  export_step_model(oo1, "difference.step" );
+  //export_step_model(oo1, "difference.step" );
   return 0;
 }
