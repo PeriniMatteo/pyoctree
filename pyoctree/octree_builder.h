@@ -289,6 +289,7 @@ cOctree oct_builder ( string name, int md, int insid, vector<double> _position, 
   int max_depth_cube = md_cube;
   
   cOctree oct = cOctree(pointCoords, connectivity, root_position, root_size, cube_position, cube_size, max_depth, max_depth_cube);
+  //cOctree oct = cOctree(pointCoords, connectivity, root_position, root_size, max_depth);
 
   vector<cOctNode*> n = oct.get_Nodes();
   std::cout << "Number of nodes = " << n.size() << std::endl;

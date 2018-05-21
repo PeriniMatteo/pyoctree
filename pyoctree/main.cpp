@@ -79,7 +79,8 @@ double find_octree_size(string _first_mesh, string _second_mesh){
 }
 
 int main(){
-  string first_mesh = "./Examples/cubex.stl";
+  //string first_mesh = "./Examples/cubex.stl";
+  string first_mesh = "./Examples/mesh_original2.stl";
   string second_mesh = "./Examples/torox.stl";
   string name;
   //vector<double> oct_position = find_octree_position(first_mesh, second_mesh);
@@ -90,10 +91,16 @@ int main(){
   for (int i = 0; i<3; i++){
     std::cout << "oct_position[" << i <<"] = " << oct_position[i] << std::endl; 
   }
-  int level = 4;
-  int level_cube = 5;
+  int level = 7;
+  int level_cube = 11;
   vector<double> cube_position = oct_position;
-  double cube_size = 0.3*oct_size;
+  
+  cube_position[0] += 0.6;
+  cube_position[1] -= 0.6;
+  cube_position[2] += 0.2;
+  
+  
+  double cube_size = 0.2*oct_size;
   std::cout << "cube_size = " << cube_size << std::endl;
   for (int i = 0; i<3; i++){
     std::cout << "cube_position[" << i <<"] = " << cube_position[i] << std::endl; 
