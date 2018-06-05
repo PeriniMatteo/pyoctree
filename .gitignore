@@ -75,4 +75,4 @@ pyoctree/main
 
 pyoctree/test_STEP/*
 *.step
-
+pyoctree/test_nearest/*

@@ -63,6 +63,7 @@ public:
     cOctNode(int _level, string _nid, vector<double> _position, double _size, int _n_max_tri);
     ~cOctNode();
     bool isLeafNode();
+    bool isPointInNode(vector<double> &p);
     bool overlapsCube(vector<double> _position, double _size); 
     int numPolys();
     void addPoly(int _indx);
@@ -118,7 +119,9 @@ public:
     double getSizeRoot();
     int numPolys();
     cOctNode* getNodeFromId(string nodeId);
+    cOctNode* getNodeFromPoint(vector<double> &p);
     cOctNode* findBranchById(string nodeId, cOctNode &node);
+    cOctNode* findBranchByPoint(vector<double> &p, cOctNode &node);
     set<int> getListPolysToCheck(cLine &ray);    
     set<int> getListPolysToCheck2(cLine &ray);    
     set<int> getListPolysToCheck3(cLine &ray);    
@@ -132,6 +135,8 @@ public:
     vector<cOctNode*> get_Leafs();
     vector<cOctNode*> get_Inside();
     vector<cOctNode*> get_Nodes();
+    vector<cOctNode*> getNeighbours(cOctNode &node);
+    vector<cOctNode*> getNeighboursInside(cOctNode &node);
     void insertPoly(cOctNode &node, cTri &poly);
     void insertPolys();
     void setupPolyList();
