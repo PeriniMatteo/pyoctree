@@ -1,3 +1,6 @@
+#ifndef BOOLS
+#define BOOLS
+
 void ResetInside(cOctNode &node)
 {
   // Recursive function used to "reset" an octree
@@ -49,6 +52,19 @@ void oct_uniform(cOctNode &node1, cOctNode &node2)
   }
 }
 
+void oct_uniform_inside(cOctNode &node1, cOctNode &node2)
+{
+  // copy inside data FORM octree1 TO octree 2
+  if (node1.isLeafNode()) {
+    if (node1.inside != node2.inside){
+      node2.inside = node1.inside;
+    }
+  } else {
+    for (unsigned int i=0; i<node1.branches.size(); i++) {
+      oct_uniform_inside(node1.branches[i], node2.branches[i]);
+    }
+  }
+}
 void oct_sum(cOctNode &node1, cOctNode &node2, cOctNode &node3)
 {
     // Recursive function used to compute boolean sum
@@ -91,9 +107,24 @@ void oct_intersect(cOctNode &node1, cOctNode &node2, cOctNode &node3)
     }
 }
 
-cOctree oct_reset(cOctree &o1, cOctree &o2)
+cOctree oct_reset(cOctree &o)
 {
-  cOctree o3 = o1;
-  ResetInside(o3.root);
-  return o3;
+  ResetInside(o.root);
+  return o;
 }
+
+cOctree oct_clone(cOctree &o, bool _keep_inside = false)
+{
+  // 0 no keep inside structure 
+  // 1 keep it
+  bool keep_inside = _keep_inside;
+  cOctree new_octree = cOctree(o);
+  oct_uniform(o.root, new_octree.root);
+  if ( keep_inside == true ){
+    oct_uniform_inside(o.root, new_octree.root);
+  } else {
+    oct_reset(new_octree);
+  }
+  return new_octree;
+}
+#endif

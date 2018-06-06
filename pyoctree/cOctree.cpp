@@ -410,7 +410,7 @@ bool cOctNode::overlapsCube(vector<double> _cube_position, double _cube_size)
 
 bool cOctNode::isPointInNode(vector<double> &p)
 {
-  // Determines if point p is inside a cOctnode
+  // Determines if point p is inside the node
   double halfSize = 0.5*size;
   
   if (p[0] > position[0] + halfSize) return false;
@@ -524,6 +524,24 @@ std::array<std::array<int, 3>, 8> cOctree::getBranchOffset(){
   return branchOffsets;
 }
 
+cOctree::cOctree(cOctree* node)
+{
+  try {
+    division = node -> division;
+  }catch(...){
+    division = false;
+  }
+  try {
+    MAX_OCTREE_LEVELS = node -> MAX_OCTREE_LEVELS;
+  }catch (...) {
+    MAX_OCTREE_LEVELS = 100;
+  }
+  branchOffsets = cOctree::getBranchOffset();
+  vector<double> position = node -> root.position;
+  double size = node -> root.size;
+  root = cOctNode(1,"0", position, size, 0);
+}
+
 cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, int max_depth = 10)
 {
   division = false;
@@ -537,6 +555,7 @@ cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _
   root = cOctNode(1,"0", position, size, polyList.size());
   insertPolys();
 }
+
 cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, vector<double> _position, double _size, int max_depth = 10)
 {
   division = false;
@@ -679,16 +698,9 @@ void cOctree::splitNodeAndReallocate(cOctNode &node)
   node.data.resize(0);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 void cOctree::splitNodeAndReallocate2(cOctNode &node)
 {
   if (division){
-    //std::cout << "split2" << std::endl;
-    //std::cout << "size" << cube_size << std::endl;
-    //std::cout << "pos" << cube_pos[0] << std::endl;
-    
     if (node.overlapsCube(cube_pos, cube_size)){
       if (node.numPolys()!=0 && node.level < MAX_OCTREE_CUBE_LEVELS){
         // Split node into 8 branches
@@ -700,7 +712,6 @@ void cOctree::splitNodeAndReallocate2(cOctNode &node)
           string nid = node.nid + "-" + NumberToString(i);
           node.addNode(node.level+1,nid,position,0.5*node.size, (int) node.numPolys()/2); 
         }
-      
         // Reallocate date from node to branches
         for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
           for (int j=0; j<node.numPolys(); j++) {
@@ -725,7 +736,6 @@ void cOctree::splitNodeAndReallocate2(cOctNode &node)
           string nid = node.nid + "-" + NumberToString(i);
           node.addNode(node.level+1,nid,position,0.5*node.size, (int) node.numPolys()/2); 
         }
-      
         // Reallocate date from node to branches
         for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
           for (int j=0; j<node.numPolys(); j++) {
@@ -742,7 +752,6 @@ void cOctree::splitNodeAndReallocate2(cOctNode &node)
     }
   }else{
     if (node.numPolys()!=0 && node.level < MAX_OCTREE_LEVELS){
-    //if (node.level < MAX_OCTREE_LEVELS){
       // Split node into 8 branches
       vector<double> position(3);
       for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
@@ -761,7 +770,6 @@ void cOctree::splitNodeAndReallocate2(cOctNode &node)
           }
         }
         if (node.branches[i].numPolys()!=0 && node.branches[i].level < MAX_OCTREE_LEVELS){
-          //if (node.branches[i].level < MAX_OCTREE_LEVELS){
           splitNodeAndReallocate2(node.branches[i]);
         }   
       }
@@ -769,9 +777,6 @@ void cOctree::splitNodeAndReallocate2(cOctNode &node)
   }
   node.data.resize(0);
 }
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 
 vector<cOctNode*> cOctree::getNodesFromLabel(int polyLabel)
 {
@@ -868,7 +873,6 @@ void cOctree::findNodes(cOctNode &node, vector<cOctNode*> &nodeList)
     findNodes(node.branches[i], nodeList);
   }
 }
-////////////////////////////////////////////////////////////////////////////////
 
 cOctNode* cOctree::getNodeFromId(string nodeId)
 {
@@ -877,7 +881,8 @@ cOctNode* cOctree::getNodeFromId(string nodeId)
 
 cOctNode* cOctree::getNodeFromPoint(vector<double> &p)
 { 
-  return findBranchByPoint(p, root);
+  // return the node that contains point p
+  return findBranchByPoint(p, root);  
 }
 
 cOctNode* cOctree::findBranchById(string nodeId, cOctNode &node)
@@ -895,28 +900,30 @@ cOctNode* cOctree::findBranchById(string nodeId, cOctNode &node)
 
 vector<cOctNode*> cOctree::getNeighbours(cOctNode &node){
   vector<cOctNode*> nl;
-  array<double,3> offs = {-1.0, 0.0, 1.0};
-  //double min_node_size = root.size / pow(2, MAX_OCTREE_LEVELS);
-  double min_node_size = 0.001;
+  //array<double,3> offs = {-1.0, 0.0, 1.0};
+  array<double,3> offs = {-1.0, 1.0, 0.0};
+  double min_node_size = 0.00001;
   double dist = 0.5 * ( node.size + min_node_size );
   vector<double> check_pos(3);
   for (double &o0 : offs){
     for (double &o1 : offs){
       for (double &o2 : offs){
-        check_pos[0] = node.position[0] + o0 * dist;
-        check_pos[1] = node.position[1] + o1 * dist;
-        check_pos[2] = node.position[2] + o2 * dist;
-        if (!( o0==0 && o1==0 && o2==0)){
-          if (root.isPointInNode(check_pos)){
-            nl.push_back(getNodeFromPoint(check_pos));
-          }
+        //offset in each directions
+        //0.000001 is to ensure that the point checked is not on an edge
+        check_pos[0] = node.position[0] + o0 * dist + 0.000001;
+        check_pos[1] = node.position[1] + o1 * dist + 0.000001;
+        check_pos[2] = node.position[2] + o2 * dist + 0.000001;
+        if (root.isPointInNode(check_pos)){
+          nl.push_back(getNodeFromPoint(check_pos));
         }
       }
     }
   }
-return nl;
+  nl.pop_back();
+  return nl;
 }
 vector<cOctNode*> cOctree::getNeighboursInside(cOctNode &node){
+  // return a list of neighbours of a node that is marked as inside
   vector<cOctNode*> nl;
   for (cOctNode* &n : getNeighbours(node)){
     if(n -> inside == true){

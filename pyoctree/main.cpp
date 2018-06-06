@@ -13,14 +13,14 @@
 #include <vtkHexahedron.h>
 
 //OpenCascade
-//#include "BRepPrimAPI_MakeBox.hxx"
-//#include "STEPControl_Writer.hxx"
+#include "BRepPrimAPI_MakeBox.hxx"
+#include "STEPControl_Writer.hxx"
 
 //My sources
 #include "cOctree.h"
 #include "octree_builder.h"
 #include "octree_export.h"
-//#include "octree_export_STEP.h"
+#include "octree_export_STEP.h"
 #include "booleans.h"
 #include "filters.h"
 
@@ -122,7 +122,7 @@ int main(){
 
   oct_uniform(o1.root, o2.root);
   //cOctree oo = oct_reset(o1,o2);
-  cOctree oo1 = oct_reset(o1,o2);
+  cOctree oo1 = oct_clone(o1);
   /*cOctree oo2 = oct_reset(o1,o2);
   
   std::cout << std::endl << "inside nodes of oo : " << oo.get_Inside().size() << std::endl ;
@@ -180,9 +180,12 @@ int main(){
   oct_save ( o2, 2, "o2_inside.vtu" );
   //oct_save ( oo, 2, "oo_sum.vtu" );
   oct_save ( oo1, 2, "oo_diff.vtu" );
-  cOctree oo2 = oct_neighbour_filter(oo1);
+  cOctree oo2 = oct_clone(oo1, true); 
+  oct_neighbour_filter(oo2,8);
   oct_save ( oo2, 2, "oo_filter.vtu" );
-  
+  cOctree oo3 = oct_clone(oo1);
+  oct_diff(oo1.root, oo2.root, oo3.root);
+  oct_save ( oo3, 2, "oo_filter_diff.vtu" );
   //export_step_model(oo1, "difference.step" );
   return 0;
 }

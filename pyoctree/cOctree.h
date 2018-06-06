@@ -112,6 +112,7 @@ public:
     vector<vector<double> > vertexCoords3D;
     vector<vector<int> > polyConnectivity;
     vector<cTri> polyList;
+    cOctree(cOctree* node);
     cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, int max_depth);
     cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, vector<double> _position, double _size, int max_depth);
     cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity, vector<double> _position, double _size, vector<double> _position_cube, double _size_cube, int max_depth, int max_depth_cube);
