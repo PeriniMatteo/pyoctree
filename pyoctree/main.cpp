@@ -81,10 +81,10 @@ double find_octree_size(string _first_mesh, string _second_mesh){
 
 int main(){
   //string first_mesh = "../Examples/model_rotated.stl";
-  string first_mesh = "../Examples/mesh_original2.stl";
+  string first_mesh = "./Examples/mesh_original2.stl";
 
   //string second_mesh = "../Examples/model_scanned_aligned.stl";
-  string second_mesh = "../Examples/mesh_damaged_scanned2.stl";
+  string second_mesh = "./Examples/mesh_damaged_scanned2.stl";
 
   string name;
   vector<double> oct_position = find_octree_position(first_mesh, second_mesh);
@@ -96,7 +96,7 @@ int main(){
     std::cout << "oct_position[" << i <<"] = " << oct_position[i] << std::endl; 
   }
   int level = 7;
-  int level_cube = 10;
+  int level_cube = 9;
   vector<double> cube_position = oct_position;
   
   cube_position[0] += 0.2*oct_size;

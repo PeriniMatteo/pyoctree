@@ -798,19 +798,20 @@ void cOctree::findBranchesByLabel(int polyLabel, cOctNode &node, vector<cOctNode
 cOctNode* cOctree::findBranchByPoint(vector<double> &p, cOctNode &node)
 {
   // Recursive function used by getNodesFromPoint
-  if (node.isPointInNode(p) && node.isLeafNode()) {
+  if (node.isLeafNode()) {
     return &node;
   } else {
     for (unsigned int i=0; i<node.branches.size(); i++) {
-      cOctNode *branch = findBranchByPoint(p, node.branches[i]);
-      if (branch != NULL) { 
-        return branch; 
+      if (node.branches[i].isPointInNode(p)){
+        cOctNode *branch = findBranchByPoint(p, node.branches[i]);
+        if (branch != NULL) { 
+          return branch; 
+        }
       }
     }
   }
   return NULL;
 }
-////////////////////////////////////////////////////////////////////////////////
 
 vector<cOctNode*> cOctree::get_Leafs()
 {
